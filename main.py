@@ -12,7 +12,7 @@ with open("tokenfile","r") as tokenfile:
 client = commands.Bot(command_prefix="m!")
 client.remove_command("help")
 
-helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!roll: roll dice")
+helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice")
 nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 # print message when bot turns on and also print every guild that its in
 @client.event
@@ -96,6 +96,9 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr_new)
 	await ctx.send(embed=embed)
 
+@client.command() 
+async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
+	await minesweeper(ctx,length,width,mines)
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [

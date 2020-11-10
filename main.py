@@ -5,19 +5,23 @@ from discord.ext import commands
 import random
 import minespy
 
+# read token
 with open("tokenfile","r") as tokenfile:
 	token = tokenfile.read()
 
 client = commands.Bot(command_prefix="m!")
 client.remove_command("help")
 
+helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!roll: roll dice")
+
+# print message when bot turns on and also print every guild that its in
 @client.event
 async def on_ready(): 
 	print(f"logged in as {client.user}")
 	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot")
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}") 
-
+# and also print every time it joins a guild
 @client.event
 async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
@@ -60,6 +64,6 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 @client.command()
 async def help(ctx):
-	await ctx.send("use d!roll {number of dice} {number of sides} to roll the bones")
+	await ctx.send(embed=helpmsg)
 
 client.run(token)

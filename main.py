@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import discord
-import random
 from discord.ext import commands
+import random
+import minespy
 
 with open("tokenfile","r") as tokenfile:
 	token = tokenfile.read()
@@ -22,8 +23,32 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 
 @client.command() 
-async def minesweeper(ctx, length: int, width: int, mines: int):
-	await ctx.send("wip")
+async def minesweeper(ctx, length: int = 10, width: int = 10, mines = 10):
+	#if str(mines).endswith("%"):
+	#	mines = (float(mines[:-1]) * 0.01) * (length * width)
+	mines = int(mines)
+	if mines >= (length * width):
+		mines = (length * width) - 1
+	await ctx.send(f"generating minefield of {length} length, {width} width, and with {mines} mines")
+	bombs = minespy.generatebombs(length,width,mines)
+	x = [ (i + 1) for i in range(width)  ]
+	y = [ (i + 1) for i in range(length) ]
+	grid = [ [ "0" for i in range(length) ] for i in range(width) ]
+	for i in x:
+		for j in y:
+			if [i,j] in bombs:
+				grid[i - 1][j - 1] = "B"
+	gridstr = ""
+	for i in grid:
+		for j in i:
+			gridstr += j
+		gridstr += "\n"
+
+	gridstr_new = gridstr.replace("B",":boom:").replace("0",":zero:")
+	while "B" in gridstr_new:
+		gridstr_new = gridstr_new.replace("0",":zero:")
+		gridstr_new = gridstr_new.replace("B",":bomb:")
+	await ctx.send(f"{gridstr_new}")
 
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):

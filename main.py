@@ -4,6 +4,16 @@ import discord
 from discord.ext import commands
 import random
 import minespy
+import re
+
+def replacenth(string, sub, wanted, n):
+	where = [m.start() for m in re.finditer(sub, string)][n-1]
+	before = string[:where]
+	after = string[where:]
+	after = after.replace(sub, wanted, 1)
+	newString = before + after
+	return newString
+
 
 # read token
 with open("tokenfile","r") as tokenfile:
@@ -28,8 +38,9 @@ async def on_guild_join(guild):
 
 @client.command() 
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
-	#if str(mines).endswith("%"):
-	#	mines = (float(mines[:-1]) * 0.01) * (length * width)
+	if length * width > 196:
+		await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
+		return
 	mines = int(mines)
 	if mines >= (length * width):
 		mines = (length * width) - 1
@@ -80,25 +91,21 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 		for j in i:
 			gridstr += f"{j}"
 		gridstr += "\n"
-	gridstr_new = gridstr
-	while "0" in gridstr_new or "1" in gridstr_new or "2" in gridstr_new or "3" in gridstr_new or "4" in gridstr_new or "5" in gridstr_new or "6" in gridstr_new or "7" in gridstr_new or "7" in gridstr_new or "B" in gridstr_new: # stole this from stackoverflow
-		gridstr_new = gridstr_new.replace("0","||:zero:||")
-		gridstr_new = gridstr_new.replace("1","||:one:||")
-		gridstr_new = gridstr_new.replace("2","||:two:||")
-		gridstr_new = gridstr_new.replace("3","||:three:||")
-		gridstr_new = gridstr_new.replace("4","||:four:||")
-		gridstr_new = gridstr_new.replace("5","||:five:||")
-		gridstr_new = gridstr_new.replace("6","||:six:||")
-		gridstr_new = gridstr_new.replace("7","||:seven:||")
-		gridstr_new = gridstr_new.replace("8","||:eight:||")
-		gridstr_new = gridstr_new.replace("B","||:boom:||")
-	gridstr_new = gridstr_new.replace("||:zero:||",":zero:",1)
-	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr_new)
+	while "0" in gridstr or "1" in gridstr or "2" in gridstr or "3" in gridstr or "4" in gridstr or "5" in gridstr or "6" in gridstr or "7" in gridstr or "7" in gridstr or "B" in gridstr: # stole this from stackoverflow
+		gridstr = gridstr.replace("0","||:zero:||")
+		gridstr = gridstr.replace("1","||:one:||")
+		gridstr = gridstr.replace("2","||:two:||")
+		gridstr = gridstr.replace("3","||:three:||")
+		gridstr = gridstr.replace("4","||:four:||")
+		gridstr = gridstr.replace("5","||:five:||")
+		gridstr = gridstr.replace("6","||:six:||")
+		gridstr = gridstr.replace("7","||:seven:||")
+		gridstr = gridstr.replace("8","||:eight:||")
+		gridstr = gridstr.replace("B","||:boom:||")
+	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
+	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
-@client.command() 
-async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
-	await minesweeper(ctx,length,width,mines)
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [
@@ -110,5 +117,19 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 @client.command()
 async def help(ctx):
 	await ctx.send(embed=helpmsg)
+
+# aliases
+
+@client.command() 
+async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
+	await minesweeper(ctx,length,width,mines)
+
+@client.command() 
+async def Ms(ctx, length: int = 6, width: int = 6, mines = 7):
+	await minesweeper(ctx,length,width,mines)
+
+@client.command() 
+async def Minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
+	await minesweeper(ctx,length,width,mines)
 
 client.run(token)

@@ -33,7 +33,7 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 	mines = int(mines)
 	if mines >= (length * width):
 		mines = (length * width) - 1
-	await ctx.send(f"generating minefield of {length} length, {width} width, and with {mines} mines")
+	#await ctx.send(f"generating minefield of {length} length, {width} width, and with {mines} mines")
 	bombs = minespy.generatebombs(length,width,mines)
 	x = [ (i + 1) for i in range(width)  ]
 	y = [ (i + 1) for i in range(length) ]
@@ -44,35 +44,35 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 				grid[i - 1][j - 1] = "B"
 	for bomb in bombs:
 		try:
-			grid[bomb[0] - 2][bomb[1] - 2] += 1
+			grid[bomb[0] - 2][bomb[1] - 2] += 1 if bomb[0] - 2 > -1 and bomb[1] - 2 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 0][bomb[1] - 2] += 1
+			grid[bomb[0] - 0][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 2][bomb[1] - 0] += 1
+			grid[bomb[0] - 2][bomb[1] - 0] += 1 if bomb[0] - 2 > -1 and bomb[1] - 0 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 0][bomb[1] - 0] += 1
+			grid[bomb[0] - 0][bomb[1] - 0] += 1 if bomb[0] - 0 > -1 and bomb[1] - 0 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 1][bomb[1] - 0] += 1
+			grid[bomb[0] - 1][bomb[1] - 0] += 1 if bomb[0] - 1 > -1 and bomb[1] - 0 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 0][bomb[1] - 1] += 1
+			grid[bomb[0] - 0][bomb[1] - 1] += 1 if bomb[0] - 0 > -1 and bomb[1] - 1 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 2][bomb[1] - 1] += 1
+			grid[bomb[0] - 2][bomb[1] - 1] += 1 if bomb[0] - 2 > -1 and bomb[1] - 1 > -1 else 0
 		except:
 			None
 		try:
-			grid[bomb[0] - 1][bomb[1] - 2] += 1
+			grid[bomb[0] - 1][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
 		except:
 			None
 	gridstr = ""
@@ -82,17 +82,19 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 		gridstr += "\n"
 	gridstr_new = gridstr
 	while "0" in gridstr_new or "1" in gridstr_new or "2" in gridstr_new or "3" in gridstr_new or "4" in gridstr_new or "5" in gridstr_new or "6" in gridstr_new or "7" in gridstr_new or "7" in gridstr_new or "B" in gridstr_new: # stole this from stackoverflow
-		gridstr_new = gridstr_new.replace("0",":zero:")
-		gridstr_new = gridstr_new.replace("1",":one:")
-		gridstr_new = gridstr_new.replace("2",":two:")
-		gridstr_new = gridstr_new.replace("3",":three:")
-		gridstr_new = gridstr_new.replace("4",":four:")
-		gridstr_new = gridstr_new.replace("5",":five:")
-		gridstr_new = gridstr_new.replace("6",":six:")
-		gridstr_new = gridstr_new.replace("7",":seven:")
-		gridstr_new = gridstr_new.replace("8",":eight:")
-		gridstr_new = gridstr_new.replace("B",":boom:")
-	await ctx.send(f"{gridstr_new}")
+		gridstr_new = gridstr_new.replace("0","||:zero:||")
+		gridstr_new = gridstr_new.replace("1","||:one:||")
+		gridstr_new = gridstr_new.replace("2","||:two:||")
+		gridstr_new = gridstr_new.replace("3","||:three:||")
+		gridstr_new = gridstr_new.replace("4","||:four:||")
+		gridstr_new = gridstr_new.replace("5","||:five:||")
+		gridstr_new = gridstr_new.replace("6","||:six:||")
+		gridstr_new = gridstr_new.replace("7","||:seven:||")
+		gridstr_new = gridstr_new.replace("8","||:eight:||")
+		gridstr_new = gridstr_new.replace("B","||:boom:||")
+	gridstr_new = gridstr_new.replace("||:zero:||",":zero:",1)
+	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr_new)
+	await ctx.send(embed=embed)
 
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):

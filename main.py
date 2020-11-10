@@ -13,7 +13,7 @@ client = commands.Bot(command_prefix="m!")
 client.remove_command("help")
 
 helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!roll: roll dice")
-
+nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 # print message when bot turns on and also print every guild that its in
 @client.event
 async def on_ready(): 
@@ -27,7 +27,7 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 
 @client.command() 
-async def minesweeper(ctx, length: int = 10, width: int = 10, mines = 10):
+async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
 	#if str(mines).endswith("%"):
 	#	mines = (float(mines[:-1]) * 0.01) * (length * width)
 	mines = int(mines)
@@ -37,21 +37,61 @@ async def minesweeper(ctx, length: int = 10, width: int = 10, mines = 10):
 	bombs = minespy.generatebombs(length,width,mines)
 	x = [ (i + 1) for i in range(width)  ]
 	y = [ (i + 1) for i in range(length) ]
-	grid = [ [ "0" for i in range(length) ] for i in range(width) ]
+	grid = [ [ 0 for i in range(length) ] for i in range(width) ]
 	for i in x:
 		for j in y:
 			if [i,j] in bombs:
 				grid[i - 1][j - 1] = "B"
+	for bomb in bombs:
+		try:
+			grid[bomb[0] - 2][bomb[1] - 2] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 0][bomb[1] - 2] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 2][bomb[1] - 0] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 0][bomb[1] - 0] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 1][bomb[1] - 0] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 0][bomb[1] - 1] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 2][bomb[1] - 1] += 1
+		except:
+			None
+		try:
+			grid[bomb[0] - 1][bomb[1] - 2] += 1
+		except:
+			None
 	gridstr = ""
 	for i in grid:
 		for j in i:
-			gridstr += j
+			gridstr += f"{j}"
 		gridstr += "\n"
-
-	gridstr_new = gridstr.replace("B",":boom:").replace("0",":zero:")
-	while "B" in gridstr_new:
+	gridstr_new = gridstr
+	while "0" in gridstr_new or "1" in gridstr_new or "2" in gridstr_new or "3" in gridstr_new or "4" in gridstr_new or "5" in gridstr_new or "6" in gridstr_new or "7" in gridstr_new or "7" in gridstr_new or "B" in gridstr_new: # stole this from stackoverflow
 		gridstr_new = gridstr_new.replace("0",":zero:")
-		gridstr_new = gridstr_new.replace("B",":bomb:")
+		gridstr_new = gridstr_new.replace("1",":one:")
+		gridstr_new = gridstr_new.replace("2",":two:")
+		gridstr_new = gridstr_new.replace("3",":three:")
+		gridstr_new = gridstr_new.replace("4",":four:")
+		gridstr_new = gridstr_new.replace("5",":five:")
+		gridstr_new = gridstr_new.replace("6",":six:")
+		gridstr_new = gridstr_new.replace("7",":seven:")
+		gridstr_new = gridstr_new.replace("8",":eight:")
+		gridstr_new = gridstr_new.replace("B",":boom:")
 	await ctx.send(f"{gridstr_new}")
 
 @client.command()

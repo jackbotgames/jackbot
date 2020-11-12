@@ -21,14 +21,14 @@ with open("tokenfile","r") as tokenfile:
 client = commands.Bot(command_prefix="m!")
 client.remove_command("help")
 
-helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice")
+helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice\nm!rps: rock paper scissors")
 nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 
 # print message when bot turns on and also print every guild that its in
 @client.event
 async def on_ready(): 
 	print(f"logged in as {client.user}")
-	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot")
+	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8192&scope=bot")
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}") 
 # and also print every time it joins a guild
@@ -90,13 +90,15 @@ async def rps(ctx,member):
 		winner = players[1][1].name
 	elif str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\u2702":     # rock > scissors
 		winner = players[0][1].name
-	title = f"{players[0][1].name} v {players[1][1].name}"
-	if winner == None:
-		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\nIts a tie!"
 	else:
+		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\nIts a tie!"
+	if winner != None:
 		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\n{winner} wins!"
+	title = f"{players[0][1].name} v {players[1][1].name}"
 	game_embed = discord.Embed(title=title,description=description)
 	await ctx.send(embed=game_embed)
+	await otherguy.dm_channel.send(embed=game_embed)
+	await ctx.author.dm_channel.send(embed=game_embed)
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [

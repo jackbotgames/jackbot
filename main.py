@@ -11,9 +11,8 @@ def replacenth(string, sub, wanted, n):
 	before = string[:where]
 	after = string[where:]
 	after = after.replace(sub, wanted, 1)
-	newString = before + after
-	return newString
-
+	new_string = before + after
+	return new_string
 
 # read token
 with open("tokenfile","r") as tokenfile:
@@ -37,60 +36,13 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 
 @client.command() 
-async def minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
+async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 	if length * width > 196:
 		await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
 		return
-	mines = int(mines)
 	if mines >= (length * width):
 		mines = (length * width) - 1
-	#await ctx.send(f"generating minefield of {length} length, {width} width, and with {mines} mines")
-	bombs = minespy.generatebombs(length,width,mines)
-	x = [ (i + 1) for i in range(width)  ]
-	y = [ (i + 1) for i in range(length) ]
-	grid = [ [ 0 for i in range(length) ] for i in range(width) ]
-	for i in x:
-		for j in y:
-			if [i,j] in bombs:
-				grid[i - 1][j - 1] = "B"
-	for bomb in bombs:
-		try:
-			grid[bomb[0] - 2][bomb[1] - 2] += 1 if bomb[0] - 2 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 0][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 2][bomb[1] - 0] += 1 if bomb[0] - 2 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 0][bomb[1] - 0] += 1 if bomb[0] - 0 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 1][bomb[1] - 0] += 1 if bomb[0] - 1 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 0][bomb[1] - 1] += 1 if bomb[0] - 0 > -1 and bomb[1] - 1 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 2][bomb[1] - 1] += 1 if bomb[0] - 2 > -1 and bomb[1] - 1 > -1 else 0
-		except:
-			None
-		try:
-			grid[bomb[0] - 1][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			None
-	gridstr = ""
-	for i in grid:
-		for j in i:
-			gridstr += f"{j}"
-		gridstr += "\n"
+	gridstr = minespy.generategrid(length,width,mines)
 	while "0" in gridstr or "1" in gridstr or "2" in gridstr or "3" in gridstr or "4" in gridstr or "5" in gridstr or "6" in gridstr or "7" in gridstr or "7" in gridstr or "B" in gridstr: # stole this from stackoverflow
 		gridstr = gridstr.replace("0","||:zero:||")
 		gridstr = gridstr.replace("1","||:one:||")

@@ -4,6 +4,7 @@ import discord
 from discord.ext import commands
 import random
 import minespy
+import ttt
 import re
 
 def replacenth(string, sub, wanted, n):
@@ -21,7 +22,7 @@ with open("tokenfile","r") as tokenfile:
 client = commands.Bot(command_prefix="m!")
 client.remove_command("help")
 
-helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice\nm!rps: rock paper scissors")
+helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice\nm!rps: rock paper scissors\nm!tictactoe: play tic tac toe. controls are wasd; combine them to use corners")
 nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 
 # print message when bot turns on and also print every guild that its in
@@ -55,7 +56,7 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 		gridstr = gridstr.replace("7","||:seven:||")
 		gridstr = gridstr.replace("8","||:eight:||")
 		gridstr = gridstr.replace("B","||:boom:||")
-	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(1,gridstr.count("||:zero:||")))
+	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
@@ -99,6 +100,74 @@ async def rps(ctx,member):
 	await ctx.send(embed=game_embed)
 	await otherguy.dm_channel.send(embed=game_embed)
 	await ctx.author.dm_channel.send(embed=game_embed)
+
+valid_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.','q']
+
+@client.command()
+async def tictactoe(ctx,member):
+	opponent = ctx.message.mentions[0]
+	await ctx.send(f"playing tic tac toe with {opponent.display_name}")
+	g = ttt.generategrid()
+	gs = g
+	for i in gs:
+		if str(i) in "123456789":
+			gs = gs.replace(i,":blue_square:")
+	bmsg = await ctx.send(gs)
+	moves = 1
+	def check(message):
+		user = message.author
+		return user == opponent or user == ctx.author
+	while moves <= 9:
+		m = await client.wait_for('message',timeout=None,check=check)
+		c = m.content.lower()
+		if c in ["as","ds","aw","dw"]:
+			c = c[::-1]
+		og = g
+		if not c in valid_movements:
+			continue
+		char = "X" if moves % 2 == 1 else "O"
+		if c == "q":
+			return
+		if c == "wa":
+			g = g.replace("1",char)
+		elif c == "w":
+			g = g.replace("2",char)
+		elif c == "wd":
+			g = g.replace("3",char)
+		elif c == "a":
+			g = g.replace("4",char)
+		elif c == ".":
+			g = g.replace("5",char)
+		elif c == "d":
+			g = g.replace("6",char)
+		elif c == "sa":
+			g = g.replace("7",char)
+		elif c == "s":
+			g = g.replace("8",char)
+		elif c == "sd":
+			g = g.replace("9",char)
+		if og != g:
+			moves += 1
+		await m.delete()
+		gs = g
+		gs = gs.replace("X",":regional_indicator_x:")
+		gs = gs.replace("O",":zero:")
+		for i in gs:
+			if str(i) in "123456789":
+				gs = gs.replace(i,":blue_square:")
+		await bmsg.edit(content=gs)
+		glist = []
+		for i in g.split("\n"):
+			if i == "":
+				continue
+			gltmp = []
+			for j in i:
+				gltmp.append(j)
+			glist.append(gltmp)
+		if ttt.checkWin(glist):
+			await ctx.send(f"{ttt.checkWin(glist)} has won!")
+			return
+
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [

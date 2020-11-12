@@ -23,6 +23,7 @@ client.remove_command("help")
 
 helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice")
 nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
+
 # print message when bot turns on and also print every guild that its in
 @client.event
 async def on_ready(): 
@@ -54,10 +55,48 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 		gridstr = gridstr.replace("7","||:seven:||")
 		gridstr = gridstr.replace("8","||:eight:||")
 		gridstr = gridstr.replace("B","||:boom:||")
-	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
+	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(1,gridstr.count("||:zero:||")))
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
+@client.command()
+async def rps(ctx,member):
+	otherguy = ctx.message.mentions[0]
+	if ctx.author.dm_channel == None:
+		await ctx.author.create_dm()
+	if otherguy.dm_channel == None:
+		await otherguy.create_dm()
+	authormsg = await ctx.author.dm_channel.send("Rock, paper, or scissors?")
+	otherguymsg = await otherguy.dm_channel.send("Rock, paper, or scissors?")
+	for i in u"\U0001f5ff\U0001f4f0\u2702": # rock/paper/scissors
+		await authormsg.add_reaction(i)
+		await otherguymsg.add_reaction(i)
+	def check(reaction,user):
+		return (user.id == ctx.author.id or user.id == otherguy.id) and (reaction.message == authormsg or reaction.message == otherguymsg)
+	players = []
+	winner = None
+	while len(players) < 2:
+		reaction,user = await client.wait_for('reaction_add', timeout=None, check=check)
+		players.append([reaction,user])
+	if str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\U0001f4f0": # rock < paper
+		winner = players[1][1].name
+	elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\U0001f5ff": # paper > rock
+		winner = players[0][1].name
+	elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f4f0":     # paper < scissors
+		winner = players[0][1].name
+	elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\u2702":     # scissors > paper
+		winner = players[1][1].name
+	elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f5ff":     # scissors < rock
+		winner = players[1][1].name
+	elif str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\u2702":     # rock > scissors
+		winner = players[0][1].name
+	title = f"{players[0][1].name} v {players[1][1].name}"
+	if winner == None:
+		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\nIts a tie!"
+	else:
+		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\n{winner} wins!"
+	game_embed = discord.Embed(title=title,description=description)
+	await ctx.send(embed=game_embed)
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [

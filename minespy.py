@@ -25,35 +25,35 @@ def generategrid(length: int, width: int, mines: int):
 		try:
 			grid[bomb[0] - 2][bomb[1] - 2] += 1 if bomb[0] - 2 > -1 and bomb[1] - 2 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 0][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 2][bomb[1] - 0] += 1 if bomb[0] - 2 > -1 and bomb[1] - 0 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 0][bomb[1] - 0] += 1 if bomb[0] - 0 > -1 and bomb[1] - 0 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 1][bomb[1] - 0] += 1 if bomb[0] - 1 > -1 and bomb[1] - 0 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 0][bomb[1] - 1] += 1 if bomb[0] - 0 > -1 and bomb[1] - 1 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 2][bomb[1] - 1] += 1 if bomb[0] - 2 > -1 and bomb[1] - 1 > -1 else 0
 		except:
-			None
+			pass
 		try:
 			grid[bomb[0] - 1][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
 		except:
-			None
+			pass
 	gridstr = ""
 	for i in grid:
 		for j in i:

@@ -116,7 +116,7 @@ async def tictactoe(ctx,member):
 	moves = 1
 	def check(message):
 		user = message.author
-		return user == opponent or user == ctx.author
+		return user == opponent if moves % 2 == 0 else user == ctx.author
 	while moves <= 9:
 		m = await client.wait_for('message',timeout=None,check=check)
 		c = m.content.lower()
@@ -148,7 +148,10 @@ async def tictactoe(ctx,member):
 			g = g.replace("9",char)
 		if og != g:
 			moves += 1
-		await m.delete()
+		try:
+			await m.delete()
+		except discord.Forbidden:
+			pass
 		gs = g
 		gs = gs.replace("X",":regional_indicator_x:")
 		gs = gs.replace("O",":zero:")

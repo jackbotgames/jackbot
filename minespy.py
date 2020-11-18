@@ -22,38 +22,22 @@ def generategrid(length: int, width: int, mines: int):
 			if [i,j] in bombs:
 				grid[i - 1][j - 1] = "B"
 	for bomb in bombs:
-		try:
-			grid[bomb[0] - 2][bomb[1] - 2] += 1 if bomb[0] - 2 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 0][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 2][bomb[1] - 0] += 1 if bomb[0] - 2 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 0][bomb[1] - 0] += 1 if bomb[0] - 0 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 1][bomb[1] - 0] += 1 if bomb[0] - 1 > -1 and bomb[1] - 0 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 0][bomb[1] - 1] += 1 if bomb[0] - 0 > -1 and bomb[1] - 1 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 2][bomb[1] - 1] += 1 if bomb[0] - 2 > -1 and bomb[1] - 1 > -1 else 0
-		except:
-			pass
-		try:
-			grid[bomb[0] - 1][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
-		except:
-			pass
+		try: grid[bomb[0] - 2][bomb[1] - 2] += 1 if bomb[0] - 2 > -1 and bomb[1] - 2 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 0][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 2][bomb[1] - 0] += 1 if bomb[0] - 2 > -1 and bomb[1] - 0 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 0][bomb[1] - 0] += 1 if bomb[0] - 0 > -1 and bomb[1] - 0 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 1][bomb[1] - 0] += 1 if bomb[0] - 1 > -1 and bomb[1] - 0 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 0][bomb[1] - 1] += 1 if bomb[0] - 0 > -1 and bomb[1] - 1 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 2][bomb[1] - 1] += 1 if bomb[0] - 2 > -1 and bomb[1] - 1 > -1 else 0
+		except: pass
+		try: grid[bomb[0] - 1][bomb[1] - 2] += 1 if bomb[0] - 1 > -1 and bomb[1] - 2 > -1 else 0
+		except: pass
 	gridstr = ""
 	for i in grid:
 		for j in i:

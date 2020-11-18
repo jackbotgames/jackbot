@@ -7,6 +7,7 @@ import minespy # library to make minesweeper boards
 import ttt as tictt # library to help with tic tac toe
 import re # regex
 import json # json
+from asyncio import exceptions as asyncioexceptions
 
 def replacenth(string, sub, wanted, n):
 	where = [m.start() for m in re.finditer(sub, string)][n-1]
@@ -20,10 +21,10 @@ def replacenth(string, sub, wanted, n):
 with open("tokenfile","r") as tokenfile:
 	token = tokenfile.read()
 
-client = commands.Bot(command_prefix="m!")
+client = commands.Bot(command_prefix="j!")
 client.remove_command("help")
 
-helpmsg = discord.Embed(title="Help",description="m!minesweeper: create minefield\nm!ms: alias for minesweeper\nm!roll: roll dice\nm!rps: rock paper scissors\nm!tictactoe: play tic tac toe. controls are wasd; combine them to use corners")
+helpmsg = discord.Embed(title="Help",description="j!minesweeper: create minefield\nj!ms: alias for minesweeper\nj!roll: roll dice\nj!rps: rock paper scissors\nj!tictactoe: play tic tac toe. controls are wasd; combine them to use corners")
 repomsg = discord.Embed(title="Repo",description="https://github.com/Vresod/jackbot")
 nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 
@@ -79,7 +80,17 @@ async def rps(ctx,member):
 	players = []
 	winner = None
 	while len(players) < 2:
-		reaction,user = await client.wait_for('reaction_add', timeout=None, check=check)
+		try:
+			reaction,user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+		except asyncioexceptions.TimeoutError:
+			await ctx.send("Game closed due to inactivity.")
+			return
+		stop = False
+		for i in players:
+			if user in i:
+				stop = True
+		if stop:
+			continue
 		players.append([reaction,user])
 	if str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\U0001f4f0": # rock < paper
 		winner = players[1][1].name
@@ -122,13 +133,17 @@ async def tictactoe(ctx,member):
 		user = message.author
 		return user == opponent if moves % 2 == 0 else user == ctx.author
 	while moves <= 9:
-		m = await client.wait_for('message',timeout=None,check=check)
+		try:
+			m = await client.wait_for('message',timeout=60.0,check=check)
+		except asyncioexceptions.TimeoutError:
+			await ctx.send("Game closed due to inactivity.")
+			return
+		print(m)
 		c = m.content.lower()
 		if c in ["as","ds","aw","dw"]:
 			c = c[::-1]
 		og = g
-		if not c in valid_t_movements:
-			continue
+		if not c in valid_t_movements: continue
 		char = "X" if moves % 2 == 1 else "O"
 		if c == "q":
 			return
@@ -192,6 +207,8 @@ async def connectfour(ctx,member):
 			gridstr += f"{j}"
 		gridstr += "\n"
 	bmsg = await ctx.send(gridstr)
+	if bmsg:
+		pass
 	moves = 1
 	while moves <= 42:
 		def check(message):
@@ -202,7 +219,6 @@ async def connectfour(ctx,member):
 		if c not in valid_c_movements:
 			continue
 		
-
 
 
 @client.command()
@@ -240,3 +256,5 @@ async def ttt(ctx,member):
 	await tictactoe(ctx,member)
 
 client.run(token)
+
+# vim: set noet ci pi sts=0 sw=4 ts=4:

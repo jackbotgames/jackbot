@@ -26,7 +26,6 @@ client.remove_command("help")
 
 helpmsg = discord.Embed(title="Help",description="j!minesweeper: create minefield\nj!ms: alias for minesweeper\nj!roll: roll dice\nj!rps: rock paper scissors\nj!tictactoe: play tic tac toe. controls are wasd; combine them to use corners")
 repomsg = discord.Embed(title="Repo",description="https://github.com/Vresod/jackbot")
-nums = [":zero:",":one:",":two:",":three:",":four:",":five:",":six:",":seven:",":eight:"]
 
 # print message when bot turns on and also print every guild that its in
 @client.event

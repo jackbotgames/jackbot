@@ -21,4 +21,5 @@ Connect 4 - Work in progress. Send a number 1-7 and your tile drops down.
 ## Invite?
 
 [top.gg link](https://top.gg/bot/775408192242974726)
+
 [direct link](https://discord.com/oauth2/authorize?client_id=775408192242974726&permissions=8192&scope=bot)

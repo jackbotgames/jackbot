@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3 
 
 import discord # discord library
 from discord.ext import commands # discord library extension to make stuff easier
@@ -7,24 +7,33 @@ import minespy # library to make minesweeper boards
 import ttt as tictt # library to help with tic tac toe
 import re # regex
 import json # json
+import extra
 from asyncio import exceptions as asyncioexceptions
-
-def replacenth(string, sub, wanted, n):
-	where = [m.start() for m in re.finditer(sub, string)][n-1]
-	before = string[:where]
-	after = string[where:]
-	after = after.replace(sub, wanted, 1)
-	new_string = before + after
-	return new_string
 
 # read token
 with open("tokenfile","r") as tokenfile:
 	token = tokenfile.read()
 
+# Help command specification
+# (declaring everything needed for the help command)
+with open("help.json", "r") as helpfile:
+	jsonhelp = json.loads(helpfile.read())
+empty_string = " "
+help_embed = discord.Embed(title="Help")
+help_message_list = []
+for category in jsonhelp:
+	field_text = ""
+	for command in jsonhelp[category]:
+		syntax = jsonhelp[category][command]["syntax"]
+		usage = jsonhelp[category][command]["usage"]
+		field_text += f"**{command}**: j!{command} {empty_string.join(syntax)}\n*{usage}*\n"
+	help_message_list.append(field_text)
+	help_embed.add_field(
+		name=category, value=help_message_list[len(help_message_list) - 1])
+
 client = commands.Bot(command_prefix="j!")
 client.remove_command("help")
 
-helpmsg = discord.Embed(title="Help",description="j!minesweeper: create minefield\nj!ms: alias for minesweeper\nj!roll: roll dice\nj!rps: rock paper scissors\nj!tictactoe: play tic tac toe. controls are wasd; combine them to use corners")
 repomsg = discord.Embed(title="Repo",description="https://github.com/Vresod/jackbot")
 
 # print message when bot turns on and also print every guild that its in
@@ -58,7 +67,7 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 		gridstr = gridstr.replace("7","||:seven:||")
 		gridstr = gridstr.replace("8","||:eight:||")
 		gridstr = gridstr.replace("B","||:boom:||")
-	gridstr = replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
+	gridstr = extra.replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
@@ -113,7 +122,7 @@ async def rps(ctx,member):
 	await otherguy.dm_channel.send(embed=game_embed)
 	await ctx.author.dm_channel.send(embed=game_embed)
 
-valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.','q']
+valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
 
 @client.command()
 async def tictactoe(ctx,member):
@@ -130,21 +139,20 @@ async def tictactoe(ctx,member):
 	moves = 1
 	def check(message):
 		user = message.author
-		return user == opponent if moves % 2 == 0 else user == ctx.author
+		return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content == "q"
 	while moves <= 9:
 		try:
 			m = await client.wait_for('message',timeout=60.0,check=check)
 		except asyncioexceptions.TimeoutError:
 			await ctx.send("Game closed due to inactivity.")
 			return
-		print(m)
 		c = m.content.lower()
 		if c in ["as","ds","aw","dw"]:
 			c = c[::-1]
 		og = g
-		if not c in valid_t_movements: continue
 		char = "X" if moves % 2 == 1 else "O"
 		if c == "q":
+			await ctx.send("Game closed.")
 			return
 		if c == "wa":
 			g = g.replace("1",char)
@@ -194,17 +202,21 @@ async def tictactoe(ctx,member):
 			await ctx.send("Nobody won, the game is tied.")
 			return
 
-valid_c_movements = [ i for i in range(1,8) ]
+valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q")
 @client.command()
 async def connectfour(ctx,member):
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
-	g = [[1,2,3,4,5,6],[7,8,9,10,11,12],[13,14,15,16,17,18],[19,20,21,22,23,24],[25,26,27,28,29,30],[31,32,33,34,35,36],[37,38,39,40,41,42]]
+	g = [ [1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21],[22,23,24,25,26,27,28],[29,30,31,32,33,34,35],[36,37,38,39,40,41,42] ]
 	gridstr = ""
 	for i in g:
 		for j in i:
-			gridstr += f"{j}"
+			gridstr += f" {j} "
 		gridstr += "\n"
+	for i in gridstr.split(" "):
+		if str(i).isdigit():
+			gridstr = gridstr.replace(f" {i} ",":blue_square:")
+	gridstr = gridstr.replace(" X ", ":red_circle:").replace(" O ", ":yellow_circle:")
 	bmsg = await ctx.send(gridstr)
 	if bmsg:
 		pass
@@ -212,13 +224,34 @@ async def connectfour(ctx,member):
 	while moves <= 42:
 		def check(message):
 			user = message.author
-			return user == opponent if moves % 2 == 0 else user == ctx.author
+			return user == opponent or user == ctx.author
 		m = await client.wait_for('message',timeout=None,check=check)
 		c = m.content
 		if c not in valid_c_movements:
 			continue
-		
-
+		if c == "q":
+			await ctx.send("game ended")
+			return
+		if c in "1234567":
+			for y in g:
+				g[g.index(y)][int(c) - 1] = " X "
+				if g.index(y) == 0:
+					break
+		else:
+			continue
+		print(g)
+		gridstr = ""
+		for i in g[::-1]:
+			for j in i:
+				gridstr += f" {j} "
+			gridstr += "\n"
+		for i in gridstr.split(" "):
+			if str(i).isdigit():
+				gridstr = gridstr.replace(f" {i} ",":blue_square:")
+		gridstr = gridstr.replace(" X ", ":red_circle:")
+		gridstr = gridstr.replace(" ","")
+		await bmsg.edit(content=gridstr)
+		await m.delete()
 
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
@@ -230,7 +263,7 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 @client.command()
 async def help(ctx):
-	await ctx.send(embed=helpmsg)
+	await ctx.send(embed=help_embed)
 
 @client.command()
 async def repo(ctx):
@@ -243,17 +276,13 @@ async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
 	await minesweeper(ctx,length,width,mines)
 
 @client.command() 
-async def Ms(ctx, length: int = 6, width: int = 6, mines = 7):
-	await minesweeper(ctx,length,width,mines)
-
-@client.command() 
-async def Minesweeper(ctx, length: int = 6, width: int = 6, mines = 7):
-	await minesweeper(ctx,length,width,mines)
-
-@client.command() 
 async def ttt(ctx,member):
 	await tictactoe(ctx,member)
 
+@client.command()
+async def c4(ctx,member):
+	await connectfour(ctx,member)
+
 client.run(token)
 
-# vim: set noet ci pi sts=0 sw=4 ts=4:
+# vim: noet ci pi sts=0 sw=4 ts=4:

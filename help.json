@@ -1,0 +1,44 @@
+{
+	"Games": {
+		"minesweeper": {
+			"syntax": ["[width]","[length]","[mines]"],
+			"usage": "generate minesweeper board"
+		},
+		"rps": {
+			"syntax": ["<person>"],
+			"usage": "play rock paper scissors with someone"
+		},
+		"tictactoe": {
+			"syntax": ["<person>"],
+			"usage": "play tic tac toe with someone. controls are wasd + .; combine them to get corners"
+		},
+		"connectfour": {
+			"syntax": ["<person>"],
+			"usage": "play connect four with someone. controls are 1-7. WIP"
+		}
+	},
+	"Aliases": {
+		"ms": {
+			"syntax": ["[width]","[length]","[mines]"],
+			"usage": "alias for minesweeper"
+		},
+		"ttt": {
+			"syntax": ["<person>"],
+			"usage": "alias for tictactoe"
+		},
+		"c4": {
+			"syntax": ["<person>"],
+			"usage": "alias for connectfour. WIP"
+		}
+	},
+	"Meta": {
+		"help": {
+			"syntax": [],
+			"usage": "show help message"
+		},
+		"repo": {
+			"syntax": [],
+			"usage": "show repo"
+		}
+	}
+}

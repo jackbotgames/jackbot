@@ -5,6 +5,7 @@ from discord.ext import commands # discord library extension to make stuff easie
 import random
 import minespy # library to make minesweeper boards
 import ttt as tictt # library to help with tic tac toe
+import c4 as con4 # library to help with connect 4
 import re # regex
 import json # json
 import extra
@@ -172,6 +173,8 @@ async def tictactoe(ctx,member):
 			g = g.replace("8",char)
 		elif c == "sd":
 			g = g.replace("9",char)
+		else:
+			continue
 		if og != g:
 			moves += 1
 		try:
@@ -207,16 +210,11 @@ valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"
 async def connectfour(ctx,member):
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
-	g = [ [1,2,3,4,5,6,7],[8,9,10,11,12,13,14],[15,16,17,18,19,20,21],[22,23,24,25,26,27,28],[29,30,31,32,33,34,35],[36,37,38,39,40,41,42] ]
-	gridstr = ""
-	for i in g:
-		for j in i:
-			gridstr += f" {j} "
-		gridstr += "\n"
-	for i in gridstr.split(" "):
-		if str(i).isdigit():
-			gridstr = gridstr.replace(f" {i} ",":blue_square:")
-	gridstr = gridstr.replace(" X ", ":red_circle:").replace(" O ", ":yellow_circle:")
+	g = ["1111111\n", "2222222\n", "3333333\n", "4444444\n", "5555555\n", "6666666\n"]
+	nums = [ str(i) for i in range(1,7) ]
+	gridstr = "".join(g)
+	for i in nums:
+		gridstr = gridstr.replace(i,":blue_square:")
 	bmsg = await ctx.send(gridstr)
 	if bmsg:
 		pass
@@ -234,24 +232,38 @@ async def connectfour(ctx,member):
 			return
 		if c in "1234567":
 			for y in g:
-				g[g.index(y)][int(c) - 1] = " X "
-				if g.index(y) == 0:
-					break
+				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
+				if not (y[int(c) - 1] in nums) and not (g[-1] == y and (y[int(c) - 1] in ["X","O"])):
+					print(g[-1] == y and y[int(c) - 1] in ["X","O"])
+					continue
+				t = list(y)
+				t[int(c) - 1] = "X" if moves % 2 == 1 else "O"
+				g[g.index(y)] = "".join(t)
+				break
+			moves += 1
 		else:
 			continue
-		print(g)
-		gridstr = ""
-		for i in g[::-1]:
-			for j in i:
-				gridstr += f" {j} "
-			gridstr += "\n"
-		for i in gridstr.split(" "):
-			if str(i).isdigit():
-				gridstr = gridstr.replace(f" {i} ",":blue_square:")
-		gridstr = gridstr.replace(" X ", ":red_circle:")
-		gridstr = gridstr.replace(" ","")
+		gridstr = "".join(g[::-1])
+		for i in nums:
+			gridstr = gridstr.replace(i,":blue_square:")
+		gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
 		await bmsg.edit(content=gridstr)
 		await m.delete()
+		glist = []
+		for i in g:
+			if i == "\n":
+				continue
+			gltmp = []
+			for j in i:
+				gltmp.append(j)
+			glist.append(gltmp)
+		if con4.check_win(glist,"X") or con4.check_win(glist,"O"):
+			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
+			await ctx.send(f"{winner} has won!")
+			return
+		elif moves > 42:
+			await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
+			return
 
 @client.command()
 async def roll(ctx, number_of_dice: int, number_of_sides: int):

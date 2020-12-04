@@ -33,3 +33,5 @@ def checkWin(board):
 		if result:
 			return result
 	return checkDiagonals(board) 
+
+# vim: noet ci pi sts=0 sw=4 ts=4:

@@ -155,6 +155,9 @@ async def tictactoe(ctx,member):
 		if c == "q":
 			await ctx.send("Game closed.")
 			return
+		if c == "r":
+			bmsg = await ctx.send(embed=msgembed)
+			continue
 		if c == "wa":
 			g = g.replace("1",char)
 		elif c == "w":
@@ -205,7 +208,7 @@ async def tictactoe(ctx,member):
 			await ctx.send("Nobody won, the game is tied.")
 			return
 
-valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q")
+valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
 @client.command()
 async def connectfour(ctx,member):
 	opponent = ctx.message.mentions[0]
@@ -222,7 +225,7 @@ async def connectfour(ctx,member):
 	while moves <= 42:
 		def check(message):
 			user = message.author
-			return user == opponent or user == ctx.author
+			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
 		m = await client.wait_for('message',timeout=None,check=check)
 		c = m.content
 		if c not in valid_c_movements:
@@ -230,11 +233,12 @@ async def connectfour(ctx,member):
 		if c == "q":
 			await ctx.send("game ended")
 			return
+		elif c == "r":
+			bmsg = await ctx.send(content=gridstr)
 		if c in "1234567":
 			for y in g:
 				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
 				if not (y[int(c) - 1] in nums) and not (g[-1] == y and (y[int(c) - 1] in ["X","O"])):
-					print(g[-1] == y and y[int(c) - 1] in ["X","O"])
 					continue
 				t = list(y)
 				t[int(c) - 1] = "X" if moves % 2 == 1 else "O"

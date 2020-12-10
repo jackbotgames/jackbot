@@ -9,7 +9,7 @@ import c4 as con4 # library to help with connect 4
 import re # regex
 import json # json
 import extra
-from asyncio import exceptions as asyncioexceptions
+import asyncio
 
 # read token
 with open("tokenfile","r") as tokenfile:
@@ -32,10 +32,12 @@ for category in jsonhelp:
 	help_embed.add_field(
 		name=category, value=help_message_list[len(help_message_list) - 1])
 
-client = commands.Bot(command_prefix="j!")
+client = commands.Bot(command_prefix="j!",activity=discord.Game("connect 4"))
 client.remove_command("help")
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/Vresod/jackbot")
+
+log_channel = client.get_channel(784583344188817428)
 
 # print message when bot turns on and also print every guild that its in
 @client.event
@@ -44,6 +46,11 @@ async def on_ready():
 	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8192&scope=bot")
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}") 
+	print(f"In {len(client.guilds)} guilds")
+	global log_channel
+	log_channel = client.get_channel(784583344188817428)
+	await log_channel.send("waking up")
+
 # and also print every time it joins a guild
 @client.event
 async def on_guild_join(guild):
@@ -91,7 +98,7 @@ async def rps(ctx,member):
 	while len(players) < 2:
 		try:
 			reaction,user = await client.wait_for('reaction_add', timeout=60.0, check=check)
-		except asyncioexceptions.TimeoutError:
+		except asyncio.exceptions.TimeoutError:
 			await ctx.send("Game closed due to inactivity.")
 			return
 		stop = False
@@ -144,7 +151,7 @@ async def tictactoe(ctx,member):
 	while moves <= 9:
 		try:
 			m = await client.wait_for('message',timeout=60.0,check=check)
-		except asyncioexceptions.TimeoutError:
+		except asyncio.exceptions.TimeoutError:
 			await ctx.send("Game closed due to inactivity.")
 			return
 		c = m.content.lower()
@@ -218,14 +225,17 @@ async def connectfour(ctx,member):
 	gridstr = "".join(g)
 	for i in nums:
 		gridstr = gridstr.replace(i,":blue_square:")
-	bmsg = await ctx.send(gridstr)
+	gridstr += ":one::two::three::four::five::six::seven:"
+	msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+	msgembed.description = gridstr
+	bmsg = await ctx.send(embed=msgembed)
 	if bmsg:
 		pass
 	moves = 1
 	while moves <= 42:
 		def check(message):
 			user = message.author
-			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
+			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or (message.content in ["q","r"] and (user == opponent or user == ctx.author))
 		m = await client.wait_for('message',timeout=None,check=check)
 		c = m.content
 		if c not in valid_c_movements:
@@ -234,24 +244,29 @@ async def connectfour(ctx,member):
 			await ctx.send("game ended")
 			return
 		elif c == "r":
-			bmsg = await ctx.send(content=gridstr)
+			msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+			msgembed.description = gridstr
+			bmsg = await ctx.send(embed=msgembed)
+		bg = list(g)
 		if c in "1234567":
 			for y in g:
 				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
-				if not (y[int(c) - 1] in nums) and not (g[-1] == y and (y[int(c) - 1] in ["X","O"])):
-					continue
+				if not y[int(c) - 1] in nums: continue
 				t = list(y)
 				t[int(c) - 1] = "X" if moves % 2 == 1 else "O"
 				g[g.index(y)] = "".join(t)
 				break
-			moves += 1
+			moves += 1 if bg != g else 0
 		else:
 			continue
 		gridstr = "".join(g[::-1])
 		for i in nums:
 			gridstr = gridstr.replace(i,":blue_square:")
 		gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
-		await bmsg.edit(content=gridstr)
+		gridstr += ":one::two::three::four::five::six::seven:"
+		msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+		msgembed.description = gridstr
+		await bmsg.edit(embed=msgembed)
 		await m.delete()
 		glist = []
 		for i in g:
@@ -278,8 +293,13 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	await ctx.send(', '.join(dice))
 
 @client.command()
-async def help(ctx):
-	await ctx.send(embed=help_embed)
+async def help(ctx,cmd = None):
+	if cmd is None:
+		await ctx.send(embed=help_embed)
+	elif cmd == "tictactoe":
+		await ctx.send("controls: ```aw w wd\na  .  d\nas s sd```")
+	elif cmd == "connect4":
+		await ctx.send(f"controls: {' '.join([ str(i) for i in range(1,8) ])}")
 
 @client.command()
 async def repo(ctx):

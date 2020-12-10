@@ -14,7 +14,7 @@
 		},
 		"connectfour": {
 			"syntax": ["<person>"],
-			"usage": "play connect four with someone. controls are 1-7. WIP"
+			"usage": "play connect four with someone. controls are 1-7."
 		}
 	},
 	"Aliases": {
@@ -28,7 +28,7 @@
 		},
 		"c4": {
 			"syntax": ["<person>"],
-			"usage": "alias for connectfour. WIP"
+			"usage": "alias for connectfour."
 		}
 	},
 	"Meta": {

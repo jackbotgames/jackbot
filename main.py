@@ -3,12 +3,9 @@
 import discord # discord library
 from discord.ext import commands # discord library extension to make stuff easier
 import random
-import minespy # library to make minesweeper boards
-import ttt as tictt # library to help with tic tac toe
-import c4 as con4 # library to help with connect 4
+from libs import minespy,tttpy,c4py,extra # library to make minesweeper boards
 import re # regex
 import json # json
-import extra
 import asyncio
 
 # read token
@@ -35,9 +32,10 @@ for category in jsonhelp:
 client = commands.Bot(command_prefix="j!",activity=discord.Game("connect 4"))
 client.remove_command("help")
 
-repomsg = discord.Embed(title="Repo",description="https://github.com/Vresod/jackbot")
+repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 
 log_channel = client.get_channel(784583344188817428)
+bug_channel = client.get_channel(775770636353011752)
 
 # print message when bot turns on and also print every guild that its in
 @client.event
@@ -47,14 +45,16 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}") 
 	print(f"In {len(client.guilds)} guilds")
-	global log_channel
+	global log_channel, bug_channel
 	log_channel = client.get_channel(784583344188817428)
+	bug_channel = client.get_channel(775770636353011752)
 	await log_channel.send("waking up")
 
 # and also print every time it joins a guild
 @client.event
 async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
+	await log_channel.send("joined a guild")
 
 @client.command() 
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
@@ -136,7 +136,7 @@ valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw',
 async def tictactoe(ctx,member):
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing tic tac toe with {opponent.display_name}")
-	g = tictt.generategrid()
+	g = tttpy.generategrid()
 	gs = g
 	for i in gs:
 		if str(i) in "123456789":
@@ -207,7 +207,7 @@ async def tictactoe(ctx,member):
 			for j in i:
 				gltmp.append(j)
 			glist.append(gltmp)
-		if tictt.checkWin(glist):
+		if tttpy.checkWin(glist):
 			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
 			await ctx.send(f"{winner} has won!")
 			return
@@ -276,7 +276,7 @@ async def connectfour(ctx,member):
 			for j in i:
 				gltmp.append(j)
 			glist.append(gltmp)
-		if con4.check_win(glist,"X") or con4.check_win(glist,"O"):
+		if c4py.check_win(glist,"X") or c4py.check_win(glist,"O"):
 			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
 			await ctx.send(f"{winner} has won!")
 			return
@@ -304,6 +304,16 @@ async def help(ctx,cmd = None):
 @client.command()
 async def repo(ctx):
 	await ctx.send(embed=repomsg)
+
+@client.command()
+async def bugreport(ctx,*report):
+	if report == ():
+		await ctx.send("Provide a report please.")
+		return
+	txt = " ".join(report)
+	await bug_channel.send(f"**{ctx.author.display_name}** from **{ctx.guild.name}**:\n{txt}",files=await extra.attachments_to_files(ctx.message.attachments))
+	await log_channel.send("received a bug report")
+	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
 # aliases
 

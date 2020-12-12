@@ -39,6 +39,10 @@
 		"repo": {
 			"syntax": [],
 			"usage": "show repo"
+		},
+		"bugreport": {
+			"syntax": ["<report>"],
+			"usage": "send bug report to bugs channel in support discord"
 		}
 	}
 }

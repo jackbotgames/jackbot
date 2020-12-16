@@ -3,7 +3,7 @@
 import discord # discord library
 from discord.ext import commands # discord library extension to make stuff easier
 import random
-from libs import minespy,tttpy,c4py,extra # library to make minesweeper boards
+from libs import minespy,tttpy,c4py,extra # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively 
 import re # regex
 import json # json
 import asyncio
@@ -34,8 +34,9 @@ client.remove_command("help")
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 
-log_channel = client.get_channel(784583344188817428)
-bug_channel = client.get_channel(775770636353011752)
+log_channel = None
+bug_channel = None
+suggestion_channel = None
 
 # print message when bot turns on and also print every guild that its in
 @client.event
@@ -45,9 +46,10 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}") 
 	print(f"In {len(client.guilds)} guilds")
-	global log_channel, bug_channel
+	global log_channel, bug_channel, suggestion_channel
 	log_channel = client.get_channel(784583344188817428)
 	bug_channel = client.get_channel(775770636353011752)
+	suggestion_channel = client.get_channel(775770609191616512)
 	await log_channel.send("waking up")
 
 # and also print every time it joins a guild
@@ -293,6 +295,10 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	await ctx.send(', '.join(dice))
 
 @client.command()
+async def coinflip(ctx):
+	await ctx.send(f"It landed on {'heads' if random.choice([0,1]) == 0 else 'tails'}!")
+
+@client.command()
 async def help(ctx,cmd = None):
 	if cmd is None:
 		await ctx.send(embed=help_embed)
@@ -311,8 +317,20 @@ async def bugreport(ctx,*report):
 		await ctx.send("Provide a report please.")
 		return
 	txt = " ".join(report)
-	await bug_channel.send(f"**{ctx.author.display_name}** from **{ctx.guild.name}**:\n{txt}",files=await extra.attachments_to_files(ctx.message.attachments))
+	guild = "Jackbot's DMs" if ctx.guild is None else ctx.guild.name
+	await bug_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{txt}",files=await extra.attachments_to_files(ctx.message.attachments))
 	await log_channel.send("received a bug report")
+	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
+
+@client.command()
+async def suggestion(ctx,*report):
+	if report == ():
+		await ctx.send("Provide a suggestion please.")
+		return
+	txt = " ".join(report)
+	guild = "Jackbot's DMs" if ctx.guild is None else ctx.guild.name
+	await suggestion_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{txt}",files=await extra.attachments_to_files(ctx.message.attachments))
+	await log_channel.send("received a suggestion")
 	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
 # aliases

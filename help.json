@@ -31,6 +31,16 @@
 			"usage": "alias for connectfour."
 		}
 	},
+	"Fun": {
+		"roll": {
+			"syntax": ["<number of dice>","<sides of dice>"],
+			"usage": "roll some dice"
+		},
+		"coinflip": {
+			"syntax": [],
+			"usage": "flip a coin"
+		}
+	},
 	"Meta": {
 		"help": {
 			"syntax": [],
@@ -43,6 +53,10 @@
 		"bugreport": {
 			"syntax": ["<report>"],
 			"usage": "send bug report to bugs channel in support discord"
+		},
+		"suggestion": {
+			"syntax": ["<suggestion>"],
+			"usage": "send suggestion to feature requests channel in support discord"
 		}
 	}
 }

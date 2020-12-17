@@ -8,16 +8,27 @@ import re # regex
 import json # json
 import asyncio # for async stuff and error exceptions
 from math import ceil as ceiling # for ceiling
+from sys import argv as cliargs
 
 # read token
 with open("tokenfile","r") as tokenfile:
 	token = tokenfile.read()
 
+prefix = ""
+for parameter in cliargs:
+	if parameter == "-p":
+		prefix = cliargs[cliargs.index(parameter) + 1]
+	elif parameter.startswith("--prefix"):
+		x = parameter.split("=")
+		prefix = x[1]
+
+prefix = "j!" if prefix == "" else prefix
+print(f"prefix:{prefix}")
+
 # Help command specification
 # (declaring everything needed for the help command)
 with open("help.json", "r") as helpfile:
 	jsonhelp = json.loads(helpfile.read())
-empty_string = " "
 help_embed = discord.Embed(title="Help")
 help_message_list = []
 for category in jsonhelp:
@@ -25,12 +36,12 @@ for category in jsonhelp:
 	for command in jsonhelp[category]:
 		syntax = jsonhelp[category][command]["syntax"]
 		usage = jsonhelp[category][command]["usage"]
-		field_text += f"**{command}**: j!{command} {empty_string.join(syntax)}\n*{usage}*\n"
+		field_text += f"**{command}**: {prefix}{command} {' '.join(syntax)}\n*{usage}*\n"
 	help_message_list.append(field_text)
 	help_embed.add_field(
 		name=category, value=help_message_list[len(help_message_list) - 1])
 
-client = commands.Bot(command_prefix="j!",activity=discord.Game("connect 4"))
+client = commands.Bot(command_prefix=prefix,activity=discord.Game("connect 4"))
 client.remove_command("help")
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")

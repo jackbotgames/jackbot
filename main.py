@@ -1,12 +1,13 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 
 import discord # discord library
 from discord.ext import commands # discord library extension to make stuff easier
 import random
-from libs import minespy,tttpy,c4py,extra # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively 
+from libs import minespy,tttpy,c4py,extra # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively
 import re # regex
 import json # json
-import asyncio
+import asyncio # for async stuff and error exceptions
+from math import ceil as ceiling # for ceiling
 
 # read token
 with open("tokenfile","r") as tokenfile:
@@ -40,11 +41,11 @@ suggestion_channel = None
 
 # print message when bot turns on and also print every guild that its in
 @client.event
-async def on_ready(): 
+async def on_ready():
 	print(f"logged in as {client.user}")
 	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8192&scope=bot")
 	for guild in client.guilds:
-		print(f"In guild: {guild.name}") 
+		print(f"In guild: {guild.name}")
 	print(f"In {len(client.guilds)} guilds")
 	global log_channel, bug_channel, suggestion_channel
 	log_channel = client.get_channel(784583344188817428)
@@ -58,7 +59,7 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
 
-@client.command() 
+@client.command()
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 	if length * width > 196:
 		await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
@@ -137,7 +138,7 @@ valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw',
 @client.command()
 async def tictactoe(ctx,member):
 	opponent = ctx.message.mentions[0]
-	await ctx.send(f"playing tic tac toe with {opponent.display_name}")
+	await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
 	g = tttpy.generategrid()
 	gs = g
 	for i in gs:
@@ -312,7 +313,13 @@ async def repo(ctx):
 	await ctx.send(embed=repomsg)
 
 @client.command()
+async def invite(ctx):
+	await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY")
+
+@client.command()
 async def bugreport(ctx,*report):
+	if ctx.guild.id == bug_channel.guild.id:
+		return
 	if report == ():
 		await ctx.send("Provide a report please.")
 		return
@@ -324,6 +331,8 @@ async def bugreport(ctx,*report):
 
 @client.command()
 async def suggestion(ctx,*report):
+	if ctx.guild.id == suggestion_channel.guild.id:
+		return
 	if report == ():
 		await ctx.send("Provide a suggestion please.")
 		return
@@ -335,11 +344,11 @@ async def suggestion(ctx,*report):
 
 # aliases
 
-@client.command() 
+@client.command()
 async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
 	await minesweeper(ctx,length,width,mines)
 
-@client.command() 
+@client.command()
 async def ttt(ctx,member):
 	await tictactoe(ctx,member)
 

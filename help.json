@@ -57,6 +57,10 @@
 		"suggestion": {
 			"syntax": ["<suggestion>"],
 			"usage": "send suggestion to feature requests channel in support discord"
+		},
+		"invite": {
+			"syntax": [],
+			"usage": "give link to support server"
 		}
 	}
 }

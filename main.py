@@ -10,9 +10,15 @@ import asyncio # for async stuff and error exceptions
 from math import ceil as ceiling # for ceiling
 from sys import argv as cliargs
 
-# read token
-with open("tokenfile","r") as tokenfile:
-	token = tokenfile.read()
+if not extra.file_exists("analytics.json"):
+	with open("analytics.json","w") as analyticsfile:
+		analytics = {}
+		for i in ["rps","connectfour","tictactoe","minesweeper","coinflip"]:
+			analytics[i] = 0
+		analyticsfile.write(json.dumps(analytics))
+
+with open("analytics.json","r") as analyticsfile:
+	analytics = json.loads(analyticsfile.read())
 
 prefix = ""
 for parameter in cliargs:
@@ -21,8 +27,21 @@ for parameter in cliargs:
 	elif parameter.startswith("--prefix"):
 		x = parameter.split("=")
 		prefix = x[1]
-
 prefix = "j!" if prefix == "" else prefix
+
+tokenfilename = ""
+for parameter in cliargs:
+	if parameter == "-t":
+		tokenfilename = cliargs[cliargs.index(parameter) + 1]
+	elif parameter.startswith("--tokenfile"):
+		x = parameter.split("=")
+		tokenfilename = x[1]
+tokenfilename = "tokenfile" if tokenfilename == "" else tokenfilename
+
+# read token
+with open(tokenfilename,"r") as tokenfile:
+	token = tokenfile.read()
+
 print(f"prefix:{prefix}")
 
 # Help command specification
@@ -72,6 +91,9 @@ async def on_guild_join(guild):
 
 @client.command()
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
+	global analytics
+	analytics["minesweeper"] += 1
+	extra.update_analytics(analytics)
 	if length * width > 196:
 		await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
 		return
@@ -95,6 +117,9 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 
 @client.command()
 async def rps(ctx,member):
+	global analytics
+	analytics["rps"] += 1
+	extra.update_analytics(analytics)
 	otherguy = ctx.message.mentions[0]
 	if ctx.author.dm_channel == None:
 		await ctx.author.create_dm()
@@ -148,6 +173,9 @@ valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw',
 
 @client.command()
 async def tictactoe(ctx,member):
+	global analytics
+	analytics["tictactoe"] += 1
+	extra.update_analytics(analytics)
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
 	g = tttpy.generategrid()
@@ -232,6 +260,9 @@ async def tictactoe(ctx,member):
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
 @client.command()
 async def connectfour(ctx,member):
+	global analytics
+	analytics["connectfour"] += 1
+	extra.update_analytics(analytics)
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
 	g = ["1111111\n", "2222222\n", "3333333\n", "4444444\n", "5555555\n", "6666666\n"]
@@ -308,6 +339,9 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 
 @client.command()
 async def coinflip(ctx):
+	global analytics
+	analytics["coinflip"] += 1
+	extra.update_analytics(analytics)
 	await ctx.send(f"It landed on {'heads' if random.choice([0,1]) == 0 else 'tails'}!")
 
 @client.command()

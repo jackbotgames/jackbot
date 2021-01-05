@@ -1,4 +1,5 @@
-tokenfile
+tokenfile*
 __pycache__
 analytics.json
 .vim
+.vscode

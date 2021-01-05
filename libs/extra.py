@@ -1,5 +1,6 @@
 import re
 import discord
+import json
 
 async def attachments_to_files(attached):
 	filelist = []
@@ -22,5 +23,17 @@ def isint(thing):
 	except ValueError:
 		return False
 	return True
+
+def update_analytics(analytics: dict):
+	with open("analytics.json","w") as analyticsfile:
+		analyticsfile.write(json.dumps(analytics))
+	return analytics
+
+def file_exists(filename):
+	try:
+		with open(filename,"r"):
+			return True
+	except FileNotFoundError:
+		return False
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

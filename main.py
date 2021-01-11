@@ -282,7 +282,8 @@ tiles_list_c = {
 	"A":"<:VoidBlock:798280014926970921>",
 	"M":"<:Blocker:798272490337206343>",
 	"X":"<:RedTile:798276293829328977>",
-	"O":"<:YellowTile:798277394573033504>"
+	"O":"<:YellowTile:798277394573033504>",
+	" ":"<:ClearTile:798283907555786802>"
 }
 @client.command()
 async def connectfour(ctx,member,save = None):
@@ -296,16 +297,15 @@ async def connectfour(ctx,member,save = None):
 		g = json.loads(base[0].replace("'",'"'))
 		moves = int(base[1])
 	else:
-		g = ["1111111\n", "2222222\n", "3333333\n", "4444444\n", "5555555\n", "6666666\n"]
+		g = ["       \n", "       \n", "       \n", "       \n", "       \n", "       \n"]
 		moves = 1
-	nums = [ str(i) for i in range(1,7) ]
 	gridstr = "".join(g[::-1])
-	for i in nums:
-		gridstr = gridstr.replace(i,":blue_square:")
 	gridstr += ":one::two::three::four::five::six::seven:"
-	# gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:").replace("M","<:Blocker:798272490337206343>")
 	for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
 	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
+	if len(gridstr) > 2048:
+		await ctx.send("The grid is too big!")
+		return
 	msgembed = discord.Embed(title=title)
 	msgembed.description = gridstr
 	savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
@@ -323,7 +323,7 @@ async def connectfour(ctx,member,save = None):
 			await ctx.send("game ended")
 			return
 		elif c == "r":
-			title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+			title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
 			msgembed = discord.Embed(title=title)
 			msgembed.description = gridstr
 			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
@@ -334,7 +334,7 @@ async def connectfour(ctx,member,save = None):
 		if c in "1234567":
 			for y in g:
 				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
-				if not y[int(c) - 1] in nums: continue
+				if not y[int(c) - 1] == " ": continue
 				t = list(y)
 				t[int(c) - 1] = "X" if moves % 2 == 1 else "O"
 				g[g.index(y)] = "".join(t)
@@ -343,8 +343,6 @@ async def connectfour(ctx,member,save = None):
 		else:
 			continue
 		gridstr = "".join(g[::-1])
-		for i in nums:
-			gridstr = gridstr.replace(i,":blue_square:")
 		for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
 		gridstr += ":one::two::three::four::five::six::seven:"
 		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"

@@ -300,7 +300,7 @@ async def connectfour(ctx,member,save = None):
 		g = ["       \n", "       \n", "       \n", "       \n", "       \n", "       \n"]
 		moves = 1
 	gridstr = "".join(g[::-1])
-	gridstr += ":one::two::three::four::five::six::seven:"
+	gridstr += "<:oneBlue:798298151114113034><:TwoBlue:798298199357784124><:ThreeBlue:798298224070492211><:FourBlue:798298249961275412><:FiveBlue:798298282857332778><:SixBlue:798298304525500436><:SevenBlue:798298324347256882>"
 	for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
 	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
 	if len(gridstr) > 2048:

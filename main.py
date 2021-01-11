@@ -180,10 +180,7 @@ async def tictactoe(ctx,member,save = None):
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
 	if save is not None:
-		print(save)
-		print(save.encode())
 		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
-		print(base)
 		g = base[0]
 		moves = int(base[1])
 	else:

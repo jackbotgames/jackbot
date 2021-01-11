@@ -29,7 +29,7 @@ def update_analytics(analytics: dict):
 		analyticsfile.write(json.dumps(analytics))
 	return analytics
 
-def file_exists(filename):
+def file_exists(filename:str):
 	try:
 		with open(filename,"r"):
 			return True

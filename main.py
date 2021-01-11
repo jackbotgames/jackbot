@@ -6,6 +6,7 @@ import random
 from libs import minespy,tttpy,c4py,extra # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively
 import re # regex
 import json # json
+import base64 # for save states
 import asyncio # for async stuff and error exceptions
 from math import ceil as ceiling # for ceiling
 from sys import argv as cliargs
@@ -183,13 +184,13 @@ async def tictactoe(ctx,member):
 	for i in gs:
 		if str(i) in "123456789":
 			gs = gs.replace(i,":blue_square:")
-	msgembed = discord.Embed(title=f"Tic Tac Toe: {ctx.author.display_name} vs {opponent.display_name}")
+	msgembed = discord.Embed(title=f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:")
 	msgembed.description = gs
 	bmsg = await ctx.send(embed=msgembed)
 	moves = 1
 	def check(message):
 		user = message.author
-		return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content == "q"
+		return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
 	while moves <= 9:
 		try:
 			m = await client.wait_for('message',timeout=60.0,check=check)
@@ -205,6 +206,8 @@ async def tictactoe(ctx,member):
 			await ctx.send("Game closed.")
 			return
 		if c == "r":
+			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+			msgembed = discord.Embed(title=title)
 			bmsg = await ctx.send(embed=msgembed)
 			continue
 		if c == "wa":
@@ -239,6 +242,8 @@ async def tictactoe(ctx,member):
 		for i in gs:
 			if str(i) in "123456789":
 				gs = gs.replace(i,":blue_square:")
+		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+		msgembed = discord.Embed(title=title)
 		msgembed.description = gs
 		await bmsg.edit(embed=msgembed)
 		glist = []
@@ -271,7 +276,7 @@ async def connectfour(ctx,member):
 	for i in nums:
 		gridstr = gridstr.replace(i,":blue_square:")
 	gridstr += ":one::two::three::four::five::six::seven:"
-	msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+	msgembed = discord.Embed(title=f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:")
 	msgembed.description = gridstr
 	bmsg = await ctx.send(embed=msgembed)
 	if bmsg:
@@ -289,9 +294,11 @@ async def connectfour(ctx,member):
 			await ctx.send("game ended")
 			return
 		elif c == "r":
-			msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+			title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+			msgembed = discord.Embed(title=title)
 			msgembed.description = gridstr
 			bmsg = await ctx.send(embed=msgembed)
+			continue
 		bg = list(g)
 		if c in "1234567":
 			for y in g:
@@ -309,7 +316,8 @@ async def connectfour(ctx,member):
 			gridstr = gridstr.replace(i,":blue_square:")
 		gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
 		gridstr += ":one::two::three::four::five::six::seven:"
-		msgembed = discord.Embed(title=f"Connect 4: {ctx.author.display_name} vs {opponent.display_name}")
+		title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+		msgembed = discord.Embed(title=title)
 		msgembed.description = gridstr
 		await bmsg.edit(embed=msgembed)
 		await m.delete()

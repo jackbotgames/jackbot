@@ -278,6 +278,12 @@ async def tictactoe(ctx,member,save = None):
 			return
 
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
+tiles_list_c = {
+	"A":"<:VoidBlock:798280014926970921>",
+	"M":"<:Blocker:798272490337206343>",
+	"X":"<:RedTile:798276293829328977>",
+	"O":"<:YellowTile:798277394573033504>"
+}
 @client.command()
 async def connectfour(ctx,member,save = None):
 	global analytics
@@ -297,8 +303,9 @@ async def connectfour(ctx,member,save = None):
 	for i in nums:
 		gridstr = gridstr.replace(i,":blue_square:")
 	gridstr += ":one::two::three::four::five::six::seven:"
-	gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
-	title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+	# gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:").replace("M","<:Blocker:798272490337206343>")
+	for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
+	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
 	msgembed = discord.Embed(title=title)
 	msgembed.description = gridstr
 	savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
@@ -338,9 +345,9 @@ async def connectfour(ctx,member,save = None):
 		gridstr = "".join(g[::-1])
 		for i in nums:
 			gridstr = gridstr.replace(i,":blue_square:")
-		gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
+		for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
 		gridstr += ":one::two::three::four::five::six::seven:"
-		title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gridstr
 		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")

@@ -9,11 +9,11 @@
 			"usage": "play rock paper scissors with someone"
 		},
 		"tictactoe": {
-			"syntax": ["<person>"],
+			"syntax": ["<person>","[save]"],
 			"usage": "play tic tac toe with someone. controls are wasd + .; combine them to get corners"
 		},
 		"connectfour": {
-			"syntax": ["<person>"],
+			"syntax": ["<person>","[save]"],
 			"usage": "play connect four with someone. controls are 1-7."
 		}
 	},

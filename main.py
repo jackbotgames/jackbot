@@ -173,21 +173,34 @@ async def rps(ctx,member):
 valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
 
 @client.command()
-async def tictactoe(ctx,member):
+async def tictactoe(ctx,member,save = None):
 	global analytics
 	analytics["tictactoe"] += 1
 	extra.update_analytics(analytics)
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
-	g = tttpy.generategrid()
+	if save is not None:
+		print(save)
+		print(save.encode())
+		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+		print(base)
+		g = base[0]
+		moves = int(base[1])
+	else:
+		g = tttpy.generategrid()
+		moves = 1
 	gs = g
+	gs = gs.replace("X",":regional_indicator_x:")
+	gs = gs.replace("O",":zero:")
 	for i in gs:
 		if str(i) in "123456789":
 			gs = gs.replace(i,":blue_square:")
+	title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
 	msgembed = discord.Embed(title=f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:")
 	msgembed.description = gs
+	savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+	msgembed.set_footer(text=savestate)
 	bmsg = await ctx.send(embed=msgembed)
-	moves = 1
 	def check(message):
 		user = message.author
 		return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
@@ -209,6 +222,8 @@ async def tictactoe(ctx,member):
 			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
 			msgembed = discord.Embed(title=title)
 			bmsg = await ctx.send(embed=msgembed)
+			savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+			msgembed.set_footer(text=savestate)
 			continue
 		if c == "wa":
 			g = g.replace("1",char)
@@ -245,6 +260,8 @@ async def tictactoe(ctx,member):
 		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gs
+		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+		msgembed.set_footer(text=savestate)
 		await bmsg.edit(embed=msgembed)
 		glist = []
 		for i in g.split("\n"):
@@ -264,24 +281,31 @@ async def tictactoe(ctx,member):
 
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
 @client.command()
-async def connectfour(ctx,member):
+async def connectfour(ctx,member,save = None):
 	global analytics
 	analytics["connectfour"] += 1
 	extra.update_analytics(analytics)
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
-	g = ["1111111\n", "2222222\n", "3333333\n", "4444444\n", "5555555\n", "6666666\n"]
+	if save is not None:
+		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+		g = json.loads(base[0].replace("'",'"'))
+		moves = int(base[1])
+	else:
+		g = ["1111111\n", "2222222\n", "3333333\n", "4444444\n", "5555555\n", "6666666\n"]
+		moves = 1
 	nums = [ str(i) for i in range(1,7) ]
-	gridstr = "".join(g)
+	gridstr = "".join(g[::-1])
 	for i in nums:
 		gridstr = gridstr.replace(i,":blue_square:")
 	gridstr += ":one::two::three::four::five::six::seven:"
-	msgembed = discord.Embed(title=f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:")
+	gridstr = gridstr.replace("O", ":yellow_circle:").replace("X",":red_circle:")
+	title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
+	msgembed = discord.Embed(title=title)
 	msgembed.description = gridstr
+	savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+	msgembed.set_footer(text=savestate)
 	bmsg = await ctx.send(embed=msgembed)
-	if bmsg:
-		pass
-	moves = 1
 	while moves <= 42:
 		def check(message):
 			user = message.author
@@ -297,6 +321,8 @@ async def connectfour(ctx,member):
 			title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
 			msgembed = discord.Embed(title=title)
 			msgembed.description = gridstr
+			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+			msgembed.set_footer(text=savestate)
 			bmsg = await ctx.send(embed=msgembed)
 			continue
 		bg = list(g)
@@ -319,6 +345,8 @@ async def connectfour(ctx,member):
 		title = f"Connect 4: *{ctx.author.display_name}*:red_circle: vs {opponent.display_name}:yellow_circle:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:red_circle: vs *{opponent.display_name}*:yellow_circle:"
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gridstr
+		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+		msgembed.set_footer(text=savestate)
 		await bmsg.edit(embed=msgembed)
 		await m.delete()
 		glist = []
@@ -402,12 +430,12 @@ async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
 	await minesweeper(ctx,length,width,mines)
 
 @client.command()
-async def ttt(ctx,member):
-	await tictactoe(ctx,member)
+async def ttt(ctx,member,save = None):
+	await tictactoe(ctx,member,save)
 
 @client.command()
-async def c4(ctx,member):
-	await connectfour(ctx,member)
+async def c4(ctx,member,save = None):
+	await connectfour(ctx,member,save)
 
 client.run(token)
 

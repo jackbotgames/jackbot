@@ -193,7 +193,7 @@ async def tictactoe(ctx,member,save = None):
 		if str(i) in "123456789":
 			gs = gs.replace(i,":blue_square:")
 	title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
-	msgembed = discord.Embed(title=f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:")
+	msgembed = discord.Embed(title=title)
 	msgembed.description = gs
 	savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
 	msgembed.set_footer(text=savestate)

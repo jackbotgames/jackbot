@@ -61,6 +61,9 @@ for category in jsonhelp:
 	help_embed.add_field(
 		name=category, value=help_message_list[len(help_message_list) - 1])
 
+with open("themes.json", "r") as themesfile:
+	themes = json.loads(themesfile.read())
+
 client = commands.Bot(command_prefix=prefix,activity=discord.Game("connect 4"))
 client.remove_command("help")
 
@@ -278,15 +281,9 @@ async def tictactoe(ctx,member,save = None):
 			return
 
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
-tiles_list_c = {
-	"A":"<:VoidBlock:798280014926970921>",
-	"M":"<:Blocker:798272490337206343>",
-	"X":"<:RedTile:798276293829328977>",
-	"O":"<:YellowTile:798277394573033504>",
-	" ":"<:ClearTile:798283907555786802>"
-}
 @client.command()
 async def connectfour(ctx,member,save = None):
+	tiles_list = themes[random.choice(list(themes))]
 	global analytics
 	analytics["connectfour"] += 1
 	extra.update_analytics(analytics)
@@ -300,9 +297,13 @@ async def connectfour(ctx,member,save = None):
 		g = ["       \n", "       \n", "       \n", "       \n", "       \n", "       \n"]
 		moves = 1
 	gridstr = "".join(g[::-1])
-	gridstr += "<:oneBlue:798298151114113034><:TwoBlue:798298199357784124><:ThreeBlue:798298224070492211><:FourBlue:798298249961275412><:FiveBlue:798298282857332778><:SixBlue:798298304525500436><:SevenBlue:798298324347256882>"
-	for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
-	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
+	theme = random.choice(list(themes))
+	tiles_list = dict(themes[theme])
+	nums_list = "".join(tiles_list["nums"])
+	gridstr += nums_list
+	tiles_list.pop("nums")
+	for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
 	if len(gridstr) > 2048:
 		await ctx.send("The grid is too big!")
 		return
@@ -323,7 +324,7 @@ async def connectfour(ctx,member,save = None):
 			await ctx.send("game ended")
 			return
 		elif c == "r":
-			title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
+			title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
 			msgembed = discord.Embed(title=title)
 			msgembed.description = gridstr
 			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
@@ -343,9 +344,9 @@ async def connectfour(ctx,member,save = None):
 		else:
 			continue
 		gridstr = "".join(g[::-1])
-		for tile in tiles_list_c: gridstr = gridstr.replace(tile,tiles_list_c[tile])
-		gridstr += ":one::two::three::four::five::six::seven:"
-		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list_c['X']} vs {opponent.display_name}{tiles_list_c['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list_c['X']} vs *{opponent.display_name}*{tiles_list_c['O']}"
+		for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+		gridstr += nums_list
+		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gridstr
 		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")

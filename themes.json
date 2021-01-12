@@ -36,6 +36,7 @@
 		"M":":white_square_button:",
 		"X":":red_circle:",
 		"O":":yellow_circle:",
+		" ": ":blue_square:",
 		"nums":[
 			":one:",
 			":two:",

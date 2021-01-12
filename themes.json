@@ -1,0 +1,49 @@
+{
+	"gamererr": {
+		"A": ":black_square_button:",
+		"M": "<:gamererrBlock:798553099090001921>",
+		"X": "<:gamererrRed:798553100025462825>",
+		"O": "<:gamererrYellow:798553099017912391>",
+		" ": "<:gamererrBlank:798553099152130048>",
+		"nums": [
+			"<:gamererr1:798559079160479774>",
+			"<:gamererr2:798559079307935755>",
+			"<:gamererr3:798559079525908531>",
+			"<:gamererr4:798559079424720937>",
+			"<:gamererr5:798559079768391681>",
+			"<:gamererr6:798559080292679692>",
+			"<:gamererr7:798559079979024425>"
+		]
+	},
+	"logan": {
+		"A":"<:VoidBlock:798280014926970921>",
+		"M":"<:Blocker:798272490337206343>",
+		"X":"<:RedTile:798276293829328977>",
+		"O":"<:YellowTile:798277394573033504>",
+		" ":"<:ClearTile:798283907555786802>",
+		"nums":[
+			"<:oneBlue:798298151114113034>",
+			"<:TwoBlue:798298199357784124>",
+			"<:ThreeBlue:798298224070492211>",
+			"<:FourBlue:798298249961275412>",
+			"<:FiveBlue:798298282857332778>",
+			"<:SixBlue:798298304525500436>",
+			"<:SevenBlue:798298324347256882>"
+		]
+	},
+	"discord": {
+		"A":":black_square_button:",
+		"M":":white_square_button:",
+		"X":":red_circle:",
+		"O":":yellow_circle:",
+		"nums":[
+			":one:",
+			":two:",
+			":three:",
+			":four:",
+			":five:",
+			":six:",
+			":seven:"
+		]
+	}
+}

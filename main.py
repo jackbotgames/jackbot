@@ -93,7 +93,7 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
 
-@client.command()
+@client.command(aliases=["ms"])
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 	global analytics
 	analytics["minesweeper"] += 1
@@ -175,7 +175,7 @@ async def rps(ctx,member):
 
 valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
 
-@client.command()
+@client.command(aliases=["ttt"])
 async def tictactoe(ctx,member,save = None):
 	global analytics
 	analytics["tictactoe"] += 1
@@ -281,7 +281,7 @@ async def tictactoe(ctx,member,save = None):
 			return
 
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
-@client.command()
+@client.command(aliases=["c4"])
 async def connectfour(ctx,member,save = None):
 	tiles_list = themes[random.choice(list(themes))]
 	global analytics
@@ -426,20 +426,6 @@ async def suggestion(ctx,*report):
 	await suggestion_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{txt}",files=await extra.attachments_to_files(ctx.message.attachments))
 	await log_channel.send("received a suggestion")
 	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
-
-# aliases
-
-@client.command()
-async def ms(ctx, length: int = 6, width: int = 6, mines = 7):
-	await minesweeper(ctx,length,width,mines)
-
-@client.command()
-async def ttt(ctx,member,save = None):
-	await tictactoe(ctx,member,save)
-
-@client.command()
-async def c4(ctx,member,save = None):
-	await connectfour(ctx,member,save)
 
 client.run(token)
 

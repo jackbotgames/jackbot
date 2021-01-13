@@ -64,6 +64,9 @@ for category in jsonhelp:
 with open("themes.json", "r") as themesfile:
 	themes = json.loads(themesfile.read())
 
+with open("c4layouts.json", "r") as c4layoutsfile:
+	c4layouts = json.loads(c4layoutsfile.read())
+
 client = commands.Bot(command_prefix=prefix,activity=discord.Game("connect 4"))
 client.remove_command("help")
 
@@ -289,6 +292,8 @@ async def connectfour(ctx,member,save = None):
 	extra.update_analytics(analytics)
 	opponent = ctx.message.mentions[0]
 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
+	if (save in c4layouts):
+		save = c4layouts[save]
 	if save is not None:
 		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
 		g = json.loads(base[0].replace("'",'"'))

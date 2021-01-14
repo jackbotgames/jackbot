@@ -432,6 +432,10 @@ async def suggestion(ctx,*report):
 	await log_channel.send("received a suggestion")
 	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
+@client.command()
+async def jack(ctx):
+	await ctx.send("<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>\n<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>\n<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>")
+
 client.run(token)
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

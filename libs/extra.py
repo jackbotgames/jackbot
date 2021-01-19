@@ -26,7 +26,7 @@ def isint(thing):
 
 def update_analytics(analytics: dict):
 	with open("analytics.json","w") as analyticsfile:
-		analyticsfile.write(json.dumps(analytics))
+		json.dump(analytics,analyticsfile)
 	return analytics
 
 def file_exists(filename:str):

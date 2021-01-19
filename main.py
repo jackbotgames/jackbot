@@ -299,7 +299,7 @@ async def connectfour(ctx,member,save = None):
 		g = json.loads(base[0].replace("'",'"'))
 		moves = int(base[1])
 	else:
-		g = ["       \n", "       \n", "       \n", "       \n", "       \n", "       \n"]
+		g = ["       \n" for _ in range(7)]
 		moves = 1
 	gridstr = "".join(g[::-1])
 	theme = random.choice(list(themes))
@@ -435,6 +435,17 @@ async def suggestion(ctx,*report):
 @client.command()
 async def jack(ctx):
 	await ctx.send("<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>\n<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>\n<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>")
+
+@client.command()
+async def stats(ctx):
+	global analytics
+	embed = discord.Embed(title="Analytics")
+	embed.add_field(name="Servers",value=f"Jackbot is in {len(client.guilds)} servers.")
+	str_usage_stats = ""
+	for cmd in analytics:
+		str_usage_stats += f"{cmd}: {analytics[cmd]}\n"
+	embed.add_field(name="Usage stats",value=str_usage_stats)
+	await ctx.send(embed=embed)
 
 client.run(token)
 

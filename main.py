@@ -301,6 +301,9 @@ async def connectfour(ctx,member,save = None):
 	else:
 		g = ["       \n" for _ in range(7)]
 		moves = 1
+		base = None
+	if base is not None:
+		pass
 	gridstr = "".join(g[::-1])
 	theme = random.choice(list(themes))
 	tiles_list = dict(themes[theme])
@@ -446,6 +449,10 @@ async def stats(ctx):
 		str_usage_stats += f"{cmd}: {analytics[cmd]}\n"
 	embed.add_field(name="Usage stats",value=str_usage_stats)
 	await ctx.send(embed=embed)
+
+@client.command()
+async def ping(ctx):
+	await ctx.send(f"Pong! {int(client.latency * 1000)}ms")
 
 client.run(token)
 

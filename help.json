@@ -39,6 +39,10 @@
 		"coinflip": {
 			"syntax": [],
 			"usage": "flip a coin"
+		},
+		"jack": {
+			"syntax": [],
+			"usage": "show jack"
 		}
 	},
 	"Meta": {
@@ -61,6 +65,14 @@
 		"invite": {
 			"syntax": [],
 			"usage": "give link to support server"
+		},
+		"stats": {
+			"syntax": [],
+			"usage": "show statistics, including usage and amount of servers"
+		},
+		"ping": {
+			"syntax": [],
+			"usage": "show latency"
 		}
 	}
 }

@@ -1,15 +1,20 @@
 #!/usr/bin/env python3
 
-import discord # discord library
-from discord.ext import commands # discord library extension to make stuff easier
+import asyncio  # for async stuff and error exceptions
+import base64  # for save states
+import json  # json
 import random
-from libs import minespy,tttpy,c4py,extra # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively
-import re # regex
-import json # json
-import base64 # for save states
-import asyncio # for async stuff and error exceptions
-from math import ceil as ceiling # for ceiling
+import re  # regex
+import time
+from math import ceil as ceiling  # for ceiling
 from sys import argv as cliargs
+
+import discord  # discord library
+from discord.ext import commands  # discord library extension to make stuff easier
+
+from libs import (  # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively
+	c4py, extra, minespy, tttpy
+)
 
 if not extra.file_exists("analytics.json"):
 	with open("analytics.json","w") as analyticsfile:

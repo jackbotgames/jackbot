@@ -5,7 +5,7 @@ import base64  # for save states
 import json  # json
 import random
 import re  # regex
-import time
+from datetime import datetime
 from math import ceil as ceiling  # for ceiling
 from sys import argv as cliargs
 
@@ -26,6 +26,8 @@ if not extra.file_exists("analytics.json"):
 with open("analytics.json","r") as analyticsfile:
 	analytics = json.loads(analyticsfile.read())
 
+
+# Load prefix from -p or --prefix argument, else it is "j!"
 prefix = ""
 for parameter in cliargs:
 	if parameter == "-p":
@@ -35,6 +37,7 @@ for parameter in cliargs:
 		prefix = x[1]
 prefix = "j!" if prefix == "" else prefix
 
+# Get the tokenfile name from -t or --tokenfile, else it is "tokenfile"
 tokenfilename = ""
 for parameter in cliargs:
 	if parameter == "-t":
@@ -86,11 +89,12 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}")
 	print(f"In {len(client.guilds)} guilds")
-	global log_channel, bug_channel, suggestion_channel
+	global log_channel, bug_channel, suggestion_channel, t0
 	log_channel = client.get_channel(784583344188817428)
 	bug_channel = client.get_channel(775770636353011752)
 	suggestion_channel = client.get_channel(775770609191616512)
 	await log_channel.send("waking up")
+	t0 = datetime.now()
 
 # and also print every time it joins a guild
 @client.event
@@ -447,11 +451,12 @@ async def jack(ctx):
 async def stats(ctx):
 	global analytics
 	embed = discord.Embed(title="Analytics")
-	embed.add_field(name="Servers",value=f"Jackbot is in {len(client.guilds)} servers.")
+	embed.add_field(name="Servers",value=f"{client.user.name} is in {len(client.guilds)} servers.")
 	str_usage_stats = ""
 	for cmd in analytics:
 		str_usage_stats += f"{cmd}: {analytics[cmd]}\n"
 	embed.add_field(name="Usage stats",value=str_usage_stats)
+	embed.add_field(name="Uptime",value=str(datetime.now() - t0).split(".")[0])
 	await ctx.send(embed=embed)
 
 @client.command()

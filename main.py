@@ -73,10 +73,36 @@ with open("themes.json", "r") as themesfile:
 	themes = json.loads(themesfile.read())
 
 client = commands.Bot(command_prefix=prefix,activity=discord.Game("connect 4"))
-client.remove_command("help")
+class MyHelpCommand(commands.DefaultHelpCommand):
+	def __init__(self, **options):
+		self.paginator = commands.Paginator()
+		super().__init__(**options)
+		self.paginator.prefix = ""
+		self.paginator.suffix = ""
+		self.no_category = "Commands"
+	def add_indented_commands(self, commands, *, heading, max_size=None):
+		if not commands:
+			return
+		self.paginator.add_line(heading)
+		max_size = max_size or self.get_max_size(commands)
+		get_width = discord.utils._string_width
+		for command in commands:
+			name = command.name
+			width = max_size - (get_width(name) - len(name))
+			entry = '{0}**{1:<{width}}**: {2}'.format(self.indent * ' ', name, command.short_doc, width=width)
+			self.paginator.add_line(self.shorten_text(entry))
+	def get_ending_note(self):
+		command_name = self.invoked_with
+		return "Type {0}{1} command for more info on a command.\n".format(self.clean_prefix, command_name)
+	async def send_pages(self):
+		destination = self.get_destination()
+		e = discord.Embed(color=discord.Color.blurple(), description='')
+		for page in self.paginator.pages:
+			e.description += page
+		await destination.send(embed=e)
+client.help_command = MyHelpCommand()
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
-
 log_channel = None
 bug_channel = None
 suggestion_channel = None
@@ -102,7 +128,7 @@ async def on_guild_join(guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
 
-@client.command(aliases=["ms"])
+@client.command(aliases=["ms"],brief="generate minesweeper board")
 async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 	global analytics
 	analytics["minesweeper"] += 1
@@ -128,7 +154,7 @@ async def minesweeper(ctx, length: int = 6, width: int = 6, mines: int = 7):
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
-@client.command()
+@client.command(brief="play rock paper scissors with someone")
 async def rps(ctx,member):
 	global analytics
 	analytics["rps"] += 1
@@ -184,7 +210,7 @@ async def rps(ctx,member):
 
 valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
 
-@client.command(aliases=["ttt"])
+@client.command(aliases=["ttt"],brief="play tic tac toe with someone",description="play tic tac toe with someone.\nthe controls are WASD, meaning that its: ```\nAW W WD\nA  .  D\nAS S SD```")
 async def tictactoe(ctx,member,save = None):
 	global analytics
 	analytics["tictactoe"] += 1
@@ -290,7 +316,7 @@ async def tictactoe(ctx,member,save = None):
 			return
 
 valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
-@client.command(aliases=["c4"])
+@client.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.")
 async def connectfour(ctx,member,save = None):
 	tiles_list = themes[random.choice(list(themes))]
 	global analytics
@@ -385,7 +411,7 @@ async def connectfour(ctx,member,save = None):
 			await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 			return
 
-@client.command()
+@client.command(brief="roll a dice")
 async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	dice = [
 		str(random.choice(range(1, number_of_sides + 1)))
@@ -393,31 +419,23 @@ async def roll(ctx, number_of_dice: int, number_of_sides: int):
 	]
 	await ctx.send(', '.join(dice))
 
-@client.command()
+@client.command(brief="flip a coin")
 async def coinflip(ctx):
 	global analytics
 	analytics["coinflip"] += 1
 	extra.update_analytics(analytics)
 	await ctx.send(f"It landed on {'heads' if random.choice([0,1]) == 0 else 'tails'}!")
 
-@client.command()
-async def help(ctx,cmd = None):
-	if cmd is None:
-		await ctx.send(embed=help_embed)
-	elif cmd == "tictactoe":
-		await ctx.send("controls: ```aw w wd\na  .  d\nas s sd```")
-	elif cmd == "connect4":
-		await ctx.send(f"controls: {' '.join([ str(i) for i in range(1,8) ])}")
 
-@client.command()
+@client.command(brief="show repo")
 async def repo(ctx):
 	await ctx.send(embed=repomsg)
 
-@client.command()
+@client.command(brief="give link to support server")
 async def invite(ctx):
 	await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY")
 
-@client.command()
+@client.command(brief="send bug report to bugs channel in support discord")
 async def bugreport(ctx,*report):
 	if ctx.guild.id == bug_channel.guild.id:
 		return
@@ -430,7 +448,7 @@ async def bugreport(ctx,*report):
 	await log_channel.send("received a bug report")
 	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
-@client.command()
+@client.command(brief="send suggestion to feature requests channel in support discord")
 async def suggestion(ctx,*report):
 	if ctx.guild.id == suggestion_channel.guild.id:
 		return
@@ -443,11 +461,11 @@ async def suggestion(ctx,*report):
 	await log_channel.send("received a suggestion")
 	await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
-@client.command()
+@client.command(brief="show jack")
 async def jack(ctx):
 	await ctx.send("<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>\n<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>\n<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>")
 
-@client.command()
+@client.command(brief="show statistics, including usage and amount of servers")
 async def stats(ctx):
 	global analytics
 	embed = discord.Embed(title="Analytics")
@@ -459,7 +477,7 @@ async def stats(ctx):
 	embed.add_field(name="Uptime",value=str(datetime.now() - t0).split(".")[0])
 	await ctx.send(embed=embed)
 
-@client.command()
+@client.command(brief="show latency")
 async def ping(ctx):
 	await ctx.send(f"Pong! {int(client.latency * 1000)}ms")
 

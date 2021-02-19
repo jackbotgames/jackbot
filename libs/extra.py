@@ -61,7 +61,8 @@ class MyHelpCommand(commands.DefaultHelpCommand):
 	def add_command_formatting(self, command):
 		if command.description:
 			self.paginator.add_line(command.description, empty=True)
-
+		elif command.brief:
+			self.paginator.add_line(command.brief,empty=True)
 		signature = self.get_command_signature(command)
 		self.paginator.add_line(f"`{signature}`""", empty=True)
 

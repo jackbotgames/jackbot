@@ -53,22 +53,6 @@ with open(tokenfilename,"r") as tokenfile:
 
 print(f"prefix:{prefix}")
 
-# Help command specification
-# (declaring everything needed for the help command)
-with open("help.json", "r") as helpfile:
-	jsonhelp = json.loads(helpfile.read())
-help_embed = discord.Embed(title="Help")
-help_message_list = []
-for category in jsonhelp:
-	field_text = ""
-	for command in jsonhelp[category]:
-		syntax = jsonhelp[category][command]["syntax"]
-		usage = jsonhelp[category][command]["usage"]
-		field_text += f"**{command}**: {prefix}{command} {' '.join(syntax)}\n*{usage}*\n"
-	help_message_list.append(field_text)
-	help_embed.add_field(
-		name=category, value=help_message_list[len(help_message_list) - 1])
-
 with open("themes.json", "r") as themesfile:
 	themes = json.loads(themesfile.read())
 

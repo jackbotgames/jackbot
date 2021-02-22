@@ -56,7 +56,7 @@ print(f"prefix:{prefix}")
 with open("themes.json", "r") as themesfile:
 	themes = json.loads(themesfile.read())
 
-client = commands.Bot(command_prefix=prefix,activity=discord.Game("connect 4"),help_command=extra.MyHelpCommand())
+client = commands.Bot(command_prefix=prefix,activity=discord.Game("starting up..."),help_command=extra.MyHelpCommand())
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 log_channel = None
 bug_channel = None
@@ -75,6 +75,7 @@ async def on_ready():
 	bug_channel = client.get_channel(775770636353011752)
 	suggestion_channel = client.get_channel(775770609191616512)
 	await log_channel.send("waking up")
+	await client.change_presence(activity=discord.Game("games"))
 	t0 = datetime.now()
 
 # and also print every time it joins a guild
@@ -93,6 +94,7 @@ class Games(commands.Cog):
 		global analytics
 		analytics["minesweeper"] += 1
 		extra.update_analytics(analytics)
+		await client.change_presence(activity=discord.Game("minesweeper"))
 		if length * width > 196:
 			await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
 			return
@@ -119,6 +121,7 @@ class Games(commands.Cog):
 		global analytics
 		analytics["rps"] += 1
 		extra.update_analytics(analytics)
+		await client.change_presence(activity=discord.Game("rock paper scissors"))
 		otherguy = ctx.message.mentions[0]
 		if ctx.author.dm_channel == None:
 			await ctx.author.create_dm()
@@ -172,6 +175,7 @@ class Games(commands.Cog):
 	async def tictactoe(self, ctx,member,save = None):
 		global analytics
 		analytics["tictactoe"] += 1
+		await client.change_presence(activity=discord.Game("tic tac toe"))
 		extra.update_analytics(analytics)
 		valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
 		opponent = ctx.message.mentions[0]
@@ -279,6 +283,7 @@ class Games(commands.Cog):
 		tiles_list = themes[random.choice(list(themes))]
 		global analytics
 		analytics["connectfour"] += 1
+		await client.change_presence(activity=discord.Game("connect 4"))
 		extra.update_analytics(analytics)
 		valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
 		opponent = ctx.message.mentions[0]

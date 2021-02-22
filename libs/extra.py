@@ -53,7 +53,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
 		for command in commands:
 			name = f"{command.name}"
 			width = max_size - (get_width(name) - len(name))
-			entry = '{0}{1:<{width}}: *{2}*'.format(self.indent * ' ', name, command.short_doc, width=width)
+			entry = "{0}{1:<{width}}: *{2}*".format(self.indent * " ", name, command.short_doc, width=width)
 			self.paginator.add_line(self.shorten_text(entry))
 	def get_ending_note(self):
 		command_name = self.invoked_with
@@ -75,7 +75,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
 				self.paginator.add_line()
 	async def send_pages(self):
 		destination = self.get_destination()
-		e = discord.Embed(color=discord.Color.blurple(), description='')
+		e = discord.Embed(title="Help",color=discord.Color.blurple(), description="")
 		for page in self.paginator.pages:
 			e.description += page
 		await destination.send(embed=e)

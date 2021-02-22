@@ -138,7 +138,7 @@ class Games(commands.Cog):
 		winner = None
 		while len(players) < 2:
 			try:
-				reaction,user = await client.wait_for('reaction_add', timeout=60.0, check=check)
+				reaction,user = await client.wait_for("reaction_add", timeout=60.0, check=check)
 			except asyncio.exceptions.TimeoutError:
 				await ctx.send("Game closed due to inactivity.")
 				return
@@ -177,7 +177,7 @@ class Games(commands.Cog):
 		analytics["tictactoe"] += 1
 		await client.change_presence(activity=discord.Game("tic tac toe"))
 		extra.update_analytics(analytics)
-		valid_t_movements = ['w', 'a', 's', 'd', 'wa', 'wd', 'sa', 'sd', '.', 'q', 'aw', 'dw', 'as', 'sd']
+		valid_t_movements = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", ".", "q", "aw", "dw", "as", "sd"]
 		opponent = ctx.message.mentions[0]
 		await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
 		if save is not None:
@@ -204,7 +204,7 @@ class Games(commands.Cog):
 			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
 		while moves <= 9:
 			try:
-				m = await client.wait_for('message',timeout=60.0,check=check)
+				m = await client.wait_for("message",timeout=60.0,check=check)
 			except asyncio.exceptions.TimeoutError:
 				await ctx.send("Game closed due to inactivity.")
 				return
@@ -322,7 +322,7 @@ class Games(commands.Cog):
 			def check(message):
 				user = message.author
 				return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_c_movements or message.content)) or (message.content in ["q","r"] and (user == opponent or user == ctx.author))
-			m = await client.wait_for('message',timeout=None,check=check)
+			m = await client.wait_for("message",timeout=None,check=check)
 			c = m.content
 			if c not in valid_c_movements:
 				continue
@@ -386,7 +386,7 @@ class Fun(commands.Cog):
 			str(random.choice(range(1, number_of_sides + 1)))
 			for _ in range(number_of_dice)
 		]
-		await ctx.send(', '.join(dice))
+		await ctx.send(", ".join(dice))
 
 	@commands.command(brief="flip a coin")
 	async def coinflip(self, ctx):

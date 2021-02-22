@@ -278,7 +278,8 @@ class Games(commands.Cog):
 				await ctx.send("Nobody won, the game is tied.")
 				return
 
-	@commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.")
+
+	@commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.\ncodes are:\n{0}".format('\n'.join(extra.list_layouts("c4layouts.json"))))
 	async def connectfour(self, ctx,member,save = None):
 		tiles_list = themes[random.choice(list(themes))]
 		global analytics

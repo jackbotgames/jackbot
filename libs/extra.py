@@ -80,5 +80,7 @@ class MyHelpCommand(commands.DefaultHelpCommand):
 			e.description += page
 		await destination.send(embed=e)
 
-
+def list_layouts(filename):
+		with open("c4layouts.json", "r") as c4layoutsfile:
+			return json.loads(c4layoutsfile.read())
 # vim: noet ci pi sts=0 sw=4 ts=4:

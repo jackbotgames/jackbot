@@ -4,16 +4,14 @@ import asyncio  # for async stuff and error exceptions
 import base64  # for save states
 import json  # json
 import random
-import re  # regex
 from datetime import datetime
-from math import ceil as ceiling  # for ceiling
 from sys import argv as cliargs
 
 import discord  # discord library
 from discord.ext import commands  # discord library extension to make stuff easier
 
 from libs import (  # libraries to make minesweeper boards, tic tac toe boards, connect four boards, and other stuff respecively
-	c4py, extra, minespy, tttpy
+	c4py, extra, minespy, tttpy, unopy
 )
 
 if not extra.file_exists("analytics.json"):
@@ -375,6 +373,17 @@ class Games(commands.Cog):
 			elif moves > 42:
 				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 				return
+	
+	@commands.command(brief="play uno")
+	async def uno(self, ctx, opponent):
+		opponent = ctx.message.mentions[0]
+		await ctx.send(f"playing uno with {opponent.display_name}")
+		p1cards = []
+		p2cards = []
+		for i in range(7):
+			p1cards.append(unopy.generate_card())
+			p2cards.append(unopy.generate_card())
+		await ctx.send("player 1's cards are:\n{0}\nplayer 2's card are:\n{1}\n".format('\n'.join(p1cards),'\n'.join(p2cards)))
 
 class Fun(commands.Cog):
 	def __init__(self, bot):

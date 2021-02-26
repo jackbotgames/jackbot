@@ -63,7 +63,7 @@ async def on_ready():
 
 # and also print every time it joins a guild
 @client.event
-async def on_guild_join(guild):
+async def on_guild_join(guild:discord.Guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
 
@@ -73,15 +73,15 @@ class Meta(commands.Cog):
 		self._last_member = None
 
 	@commands.command(brief="show repo")
-	async def repo(self, ctx):
+	async def repo(self, ctx:commands.Context):
 		await ctx.send(embed=repomsg)
 
 	@commands.command(brief="give link to support server")
-	async def invite(self, ctx):
+	async def invite(self, ctx:commands.Context):
 		await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY")
 
 	@commands.command(brief="send bug report to bugs channel in support discord")
-	async def bugreport(self, ctx,*report):
+	async def bugreport(self, ctx:commands.Context,*report):
 		if ctx.guild.id == bug_channel.guild.id:
 			return
 		if report == ():
@@ -94,7 +94,7 @@ class Meta(commands.Cog):
 		await ctx.message.add_reaction(b'\xe2\x9c\x85'.decode("utf-8"))
 
 	@commands.command(brief="send suggestion to feature requests channel in support discord")
-	async def suggestion(self, ctx,*report):
+	async def suggestion(self, ctx:commands.Context,*report):
 		if ctx.guild.id == suggestion_channel.guild.id:
 			return
 		if report == ():
@@ -108,7 +108,7 @@ class Meta(commands.Cog):
 
 
 	@commands.command(brief="show statistics, including usage and amount of servers")
-	async def stats(self, ctx):
+	async def stats(self, ctx:commands.Context):
 		with open("analytics.json","r") as analyticsfile: analytics = json.loads(analyticsfile.read())
 		embed = discord.Embed(title="Analytics")
 		embed.add_field(name="Servers",value=f"{client.user.name} is in {len(client.guilds)} servers.")
@@ -120,7 +120,8 @@ class Meta(commands.Cog):
 		await ctx.send(embed=embed)
 
 	@commands.command(brief="show latency")
-	async def ping(ctx): await ctx.send(f"Pong! {int(client.latency * 1000)}ms")
+	async def ping(self,ctx:commands.Context):
+		await ctx.send(f"Pong! {int(client.latency * 1000)}ms")
 
 client.add_cog(Games(client))
 client.add_cog(Fun(client))

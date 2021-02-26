@@ -24,7 +24,7 @@ class Games(commands.Cog):
 		self._last_member = None
 	
 	@commands.command(aliases=["ms"],brief="generate minesweeper board")
-	async def minesweeper(self, ctx, length: int = 6, width: int = 6, mines: int = 7):
+	async def minesweeper(self, ctx:commands.Context, length: int = 6, width: int = 6, mines: int = 7):
 		global analytics
 		analytics["minesweeper"] += 1
 		extra.update_analytics(analytics)
@@ -51,7 +51,7 @@ class Games(commands.Cog):
 		await ctx.send(embed=embed)
 
 	@commands.command(brief="play rock paper scissors with someone")
-	async def rps(self, ctx,member):
+	async def rps(self, ctx:commands.Context,member):
 		global analytics
 		analytics["rps"] += 1
 		extra.update_analytics(analytics)
@@ -106,7 +106,7 @@ class Games(commands.Cog):
 		await ctx.author.dm_channel.send(embed=game_embed)
 
 	@commands.command(aliases=["ttt"],brief="play tic tac toe with someone",description="play tic tac toe with someone.\nthe controls are WASD, meaning that its: ```\nAW W WD\nA  .  D\nAS S SD```")
-	async def tictactoe(self, ctx,member,save = None):
+	async def tictactoe(self, ctx:commands.Context,member,save = None):
 		global analytics
 		analytics["tictactoe"] += 1
 		await self.bot.change_presence(activity=discord.Game("tic tac toe"))
@@ -214,7 +214,7 @@ class Games(commands.Cog):
 
 
 	@commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.\ncodes are:\n{0}".format('\n'.join(extra.list_layouts("c4layouts.json"))))
-	async def connectfour(self, ctx,member,save = None):
+	async def connectfour(self, ctx:commands.Context,member,save = None):
 		tiles_list = themes[random.choice(list(themes))]
 		global analytics
 		analytics["connectfour"] += 1

@@ -11,7 +11,8 @@ from libs import extra
 
 from games import Games
 from fun import Fun
-
+import traceback
+import sys
 
 # Load prefix from -p or --prefix argument, else it is "j!"
 prefix = ""
@@ -66,6 +67,25 @@ async def on_ready():
 async def on_guild_join(guild:discord.Guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
+
+@client.event
+async def on_command_completion(ctx):
+	await client.change_presence(activity=discord.Game(ctx.command.name))
+
+@client.event
+async def on_command_error(ctx:commands.Context, exception):
+	embed = discord.Embed(color=discord.Color.red())
+	if type(exception) is commands.errors.MissingRequiredArgument:
+		embed.title = "You forgot an argument"
+		embed.description = f"The syntax to `{client.command_prefix}{ctx.command.name}` is `{client.command_prefix}{ctx.command.name} {ctx.command.signature}`."
+		await ctx.send(embed=embed)
+	elif type(exception) is commands.CommandNotFound:
+		embed.title = "Invalid command"
+		embed.description = f"The command you just tried to use is invalid. Use `{client.command_prefix}help` to see all commands."
+		await ctx.send(embed=embed)
+	else:
+		print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
+		traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
 class Meta(commands.Cog):
 	def __init__(self, bot):

@@ -28,7 +28,6 @@ class Games(commands.Cog):
 		global analytics
 		analytics["minesweeper"] += 1
 		extra.update_analytics(analytics)
-		await self.bot.change_presence(activity=discord.Game("minesweeper"))
 		if length * width > 196:
 			await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
 			return
@@ -55,7 +54,6 @@ class Games(commands.Cog):
 		global analytics
 		analytics["rps"] += 1
 		extra.update_analytics(analytics)
-		await self.bot.change_presence(activity=discord.Game("rock paper scissors"))
 		otherguy = ctx.message.mentions[0]
 		if ctx.author.dm_channel == None:
 			await ctx.author.create_dm()
@@ -109,7 +107,6 @@ class Games(commands.Cog):
 	async def tictactoe(self, ctx:commands.Context,member,save = None):
 		global analytics
 		analytics["tictactoe"] += 1
-		await self.bot.change_presence(activity=discord.Game("tic tac toe"))
 		extra.update_analytics(analytics)
 		valid_t_movements = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", ".", "q", "aw", "dw", "as", "sd"]
 		opponent = ctx.message.mentions[0]
@@ -218,7 +215,6 @@ class Games(commands.Cog):
 		tiles_list = themes[random.choice(list(themes))]
 		global analytics
 		analytics["connectfour"] += 1
-		await self.bot.change_presence(activity=discord.Game("connect 4"))
 		extra.update_analytics(analytics)
 		valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
 		opponent = ctx.message.mentions[0]

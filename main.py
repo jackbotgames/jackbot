@@ -5,8 +5,7 @@ from datetime import datetime
 from sys import argv as cliargs
 import importlib
 
-import discord
-from discord.errors import GatewayNotFound  # discord library
+import discord # discord library
 from discord.ext import commands  # discord library extension to make stuff easier
 
 from libs import extra

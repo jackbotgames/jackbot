@@ -61,6 +61,9 @@ async def on_ready():
 	suggestion_channel = client.get_channel(775770609191616512)
 	await log_channel.send("waking up")
 	await client.change_presence(activity=discord.Game("games"))
+	client.add_cog(games.Games(client))
+	client.add_cog(fun.Fun(client))
+	client.add_cog(meta.Meta(client))
 	t0 = datetime.now()
 
 # and also print every time it joins a guild
@@ -85,11 +88,19 @@ async def on_command_error(ctx:commands.Context, exception):
 		embed.title = "Invalid command"
 		embed.description = f"The command you just tried to use is invalid. Use `{client.command_prefix}help` to see all commands."
 		await ctx.send(embed=embed)
-	elif type(exception) == commands.errors.NotOwner:
+	elif type(exception) is commands.errors.NotOwner:
 		app_info = await client.application_info()
 		embed.title = "You do not have access to this command."
 		embed.description = f"You must be the owner of this discord bot ({app_info.owner.name})."
 		await ctx.send(embed=embed)
+	elif type(exception) is commands.errors.CommandInvokeError:
+		embed.title = "Invalid permissions"
+		embed.description = "Somebody tried to use me in a channel where I can't talk."
+		for channel in ctx.guild.channels:
+			try:
+				await channel.send(embed=embed)
+				break
+			except: pass
 	else:
 		print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
 		traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
@@ -123,9 +134,6 @@ async def reload(ctx,cog_to_reload = None):
 		client.add_cog(meta.Meta(client))
 	await ctx.send("Reload complete!")
 
-client.add_cog(games.Games(client))
-client.add_cog(fun.Fun(client))
-client.add_cog(meta.Meta(client))
 client.run(token)
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

@@ -13,7 +13,7 @@ from discord_slash.model import SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option # slash commands
 from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
 from discord_slash.model import ButtonStyle
-
+import base64
 import random
 from libs import *
 
@@ -167,6 +167,107 @@ async def rps(ctx:SlashContext,member:discord.Member):
 	game_embed = discord.Embed(title=f"{button_ctx.author.display_name} v {button_ctx_2.author.display_name}",description=description)
 	await button_ctx_2.send(embed=game_embed)
 
+@slash.slash(description="play tic tac toe with someone",name="tictactoe")
+async def tictactoe(ctx:SlashContext,opponent:discord.Member,save:str = None):
+	global analytics
+	analytics["tictactoe"] += 1
+	extra.update_analytics(analytics)
+	if save is not None:
+		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+		g = base[0]
+		moves = int(base[1])
+	else:
+		g = tttpy.generategrid()
+		moves = 1
+	gs = g
+	gs = gs.replace("X",":regional_indicator_x:")
+	gs = gs.replace("O",":zero:")
+	for i in gs:
+		if str(i) in "123456789":
+			gs = gs.replace(i,":blue_square:")
+	title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+	msgembed = discord.Embed(title=title)
+	msgembed.description = gs
+	savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+	msgembed.set_footer(text=savestate)
+	components = [
+		create_actionrow(
+			create_button(style=ButtonStyle.blue,label="Up Left",custom_id="wa"),
+			create_button(style=ButtonStyle.blue,label="Up",custom_id="w"),
+			create_button(style=ButtonStyle.blue,label="Up Right",custom_id="wd")
+		),
+		create_actionrow(
+			create_button(style=ButtonStyle.blue,label="Left",custom_id="a"),
+			create_button(style=ButtonStyle.blue,label="Center",custom_id="."),
+			create_button(style=ButtonStyle.blue,label="Right",custom_id="d")
+		),
+		create_actionrow(
+			create_button(style=ButtonStyle.blue,label="Down Left",custom_id="sa"),
+			create_button(style=ButtonStyle.blue,label="Down",custom_id="s"),
+			create_button(style=ButtonStyle.blue,label="Down Right",custom_id="sd")
+		),
+		create_actionrow(
+			create_button(style=ButtonStyle.red,label="Exit",custom_id="q"),
+		)
+	]
+	await ctx.send(embed=msgembed,components=components)
+	while moves <= 9:
+		button_ctx:ComponentContext = await wait_for_component(client,components=components,check=lambda c_ctx: c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent)
+		og = g
+		char = "X" if moves % 2 == 1 else "O"
+		if button_ctx.custom_id == "q":
+			await button_ctx.send("Game closed.")
+			return
+		if button_ctx.custom_id == "wa":
+			g = g.replace("1",char)
+		elif button_ctx.custom_id == "w":
+			g = g.replace("2",char)
+		elif button_ctx.custom_id == "wd":
+			g = g.replace("3",char)
+		elif button_ctx.custom_id == "a":
+			g = g.replace("4",char)
+		elif button_ctx.custom_id == ".":
+			g = g.replace("5",char)
+		elif button_ctx.custom_id == "d":
+			g = g.replace("6",char)
+		elif button_ctx.custom_id == "sa":
+			g = g.replace("7",char)
+		elif button_ctx.custom_id == "s":
+			g = g.replace("8",char)
+		elif button_ctx.custom_id == "sd":
+			g = g.replace("9",char)
+		else:
+			continue
+		if og != g:
+			moves += 1
+		gs = g
+		gs = gs.replace("X",":regional_indicator_x:")
+		gs = gs.replace("O",":zero:")
+		for i in gs:
+			if str(i) in "123456789":
+				gs = gs.replace(i,":blue_square:")
+		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+		msgembed = discord.Embed(title=title)
+		msgembed.description = gs
+		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+		msgembed.set_footer(text=savestate)
+		await button_ctx.edit_origin(embed=msgembed)
+		glist = []
+		for i in g.split("\n"):
+			if i == "":
+				continue
+			gltmp = []
+			for j in i:
+					gltmp.append(j)
+			glist.append(gltmp)
+		if tttpy.checkWin(glist):
+			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
+			await ctx.send(f"{winner} has won!")
+			return
+		elif moves > 9:
+			await ctx.send("Nobody won, the game is tied.")
+			return
+
 @slash.slash(description="show repo",name='repo')
 async def repo(ctx:SlashContext):
 	await ctx.send(embed=repomsg,hidden=True)
@@ -188,7 +289,6 @@ async def suggestion(ctx:SlashContext,suggestion):
 	await suggestion_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{suggestion}")
 	await log_channel.send("received a suggestion")
 	await ctx.send("Suggestion received!",hidden=True)
-
 
 @slash.slash(description="show statistics, including usage and amount of servers",name='stats')
 async def stats(ctx:SlashContext):
@@ -221,9 +321,9 @@ async def coinflip(ctx:SlashContext,hidden:bool = False):
 @slash.slash(description="show jack")
 async def jack(ctx:SlashContext,hidden:bool = False):
 	await ctx.send("""\
-<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>
-<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>
-<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>""",hidden=hidden)
+	<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>
+	<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>
+	<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>""".replace("	",""),hidden=hidden)
 
 client.run(token)
 

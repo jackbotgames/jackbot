@@ -49,165 +49,165 @@ class Games(commands.Cog):
 	# 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	# 	await ctx.send(embed=embed)
 
-	@commands.command(brief="play rock paper scissors with someone")
-	async def rps(self, ctx:commands.Context,member):
-		global analytics
-		analytics["rps"] += 1
-		extra.update_analytics(analytics)
-		otherguy = ctx.message.mentions[0]
-		if ctx.author.dm_channel == None:
-			await ctx.author.create_dm()
-		if otherguy.dm_channel == None:
-			await otherguy.create_dm()
-		authormsg = await ctx.author.dm_channel.send("Rock, paper, or scissors?")
-		otherguymsg = await otherguy.dm_channel.send("Rock, paper, or scissors?")
-		for i in u"\U0001f5ff\U0001f4f0\u2702": # rock/paper/scissors
-			await authormsg.add_reaction(i)
-			await otherguymsg.add_reaction(i)
-		def check(reaction,user):
-			return (user.id == ctx.author.id or user.id == otherguy.id) and (reaction.message == authormsg or reaction.message == otherguymsg)
-		players = []
-		winner = None
-		while len(players) < 2:
-			try:
-				reaction,user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
-			except asyncio.exceptions.TimeoutError:
-				await ctx.send("Game closed due to inactivity.")
-				return
-			stop = False
-			for i in players:
-				if user in i:
-					stop = True
-			if stop:
-				continue
-			players.append([reaction,user])
-		if str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\U0001f4f0": # rock < paper
-			winner = players[1][1].name
-		elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\U0001f5ff": # paper > rock
-			winner = players[0][1].name
-		elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f4f0":     # paper < scissors
-			winner = players[0][1].name
-		elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\u2702":     # scissors > paper
-			winner = players[1][1].name
-		elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f5ff":     # scissors < rock
-			winner = players[1][1].name
-		elif str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\u2702":     # rock > scissors
-			winner = players[0][1].name
-		else:
-			description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\nIts a tie!"
-		if winner != None:
-			description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\n{winner} wins!"
-		title = f"{players[0][1].name} v {players[1][1].name}"
-		game_embed = discord.Embed(title=title,description=description)
-		await ctx.send(embed=game_embed)
-		await otherguy.dm_channel.send(embed=game_embed)
-		await ctx.author.dm_channel.send(embed=game_embed)
+	# @commands.command(brief="play rock paper scissors with someone")
+	# async def rps(self, ctx:commands.Context,member):
+	# 	global analytics
+	# 	analytics["rps"] += 1
+	# 	extra.update_analytics(analytics)
+	# 	otherguy = ctx.message.mentions[0]
+	# 	if ctx.author.dm_channel == None:
+	# 		await ctx.author.create_dm()
+	# 	if otherguy.dm_channel == None:
+	# 		await otherguy.create_dm()
+	# 	authormsg = await ctx.author.dm_channel.send("Rock, paper, or scissors?")
+	# 	otherguymsg = await otherguy.dm_channel.send("Rock, paper, or scissors?")
+	# 	for i in u"\U0001f5ff\U0001f4f0\u2702": # rock/paper/scissors
+	# 		await authormsg.add_reaction(i)
+	# 		await otherguymsg.add_reaction(i)
+	# 	def check(reaction,user):
+	# 		return (user.id == ctx.author.id or user.id == otherguy.id) and (reaction.message == authormsg or reaction.message == otherguymsg)
+	# 	players = []
+	# 	winner = None
+	# 	while len(players) < 2:
+	# 		try:
+	# 			reaction,user = await self.bot.wait_for("reaction_add", timeout=60.0, check=check)
+	# 		except asyncio.exceptions.TimeoutError:
+	# 			await ctx.send("Game closed due to inactivity.")
+	# 			return
+	# 		stop = False
+	# 		for i in players:
+	# 			if user in i:
+	# 				stop = True
+	# 		if stop:
+	# 			continue
+	# 		players.append([reaction,user])
+	# 	if str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\U0001f4f0": # rock < paper
+	# 		winner = players[1][1].name
+	# 	elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\U0001f5ff": # paper > rock
+	# 		winner = players[0][1].name
+	# 	elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f4f0":     # paper < scissors
+	# 		winner = players[0][1].name
+	# 	elif str(players[0][0].emoji) == u"\U0001f4f0" and str(players[1][0].emoji) == u"\u2702":     # scissors > paper
+	# 		winner = players[1][1].name
+	# 	elif str(players[0][0].emoji) == u"\u2702" and str(players[1][0].emoji) == u"\U0001f5ff":     # scissors < rock
+	# 		winner = players[1][1].name
+	# 	elif str(players[0][0].emoji) == u"\U0001f5ff" and str(players[1][0].emoji) == u"\u2702":     # rock > scissors
+	# 		winner = players[0][1].name
+	# 	else:
+	# 		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\nIts a tie!"
+	# 	if winner != None:
+	# 		description = f"{players[0][0].emoji}   v   {players[1][0].emoji}\n\n{winner} wins!"
+	# 	title = f"{players[0][1].name} v {players[1][1].name}"
+	# 	game_embed = discord.Embed(title=title,description=description)
+	# 	await ctx.send(embed=game_embed)
+	# 	await otherguy.dm_channel.send(embed=game_embed)
+	# 	await ctx.author.dm_channel.send(embed=game_embed)
 
-	@commands.command(aliases=["ttt"],brief="play tic tac toe with someone",description="play tic tac toe with someone.\nthe controls are WASD, meaning that its: ```\nAW W WD\nA  .  D\nAS S SD```")
-	async def tictactoe(self, ctx:commands.Context,member,save = None):
-		global analytics
-		analytics["tictactoe"] += 1
-		extra.update_analytics(analytics)
-		valid_t_movements = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", ".", "q", "aw", "dw", "as", "sd"]
-		opponent = ctx.message.mentions[0]
-		await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
-		if save is not None:
-			base = base64.b64decode(save.encode()).decode("utf-8").split("|")
-			g = base[0]
-			moves = int(base[1])
-		else:
-			g = tttpy.generategrid()
-			moves = 1
-		gs = g
-		gs = gs.replace("X",":regional_indicator_x:")
-		gs = gs.replace("O",":zero:")
-		for i in gs:
-			if str(i) in "123456789":
-				gs = gs.replace(i,":blue_square:")
-		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
-		msgembed = discord.Embed(title=title)
-		msgembed.description = gs
-		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
-		msgembed.set_footer(text=savestate)
-		bmsg = await ctx.send(embed=msgembed)
-		def check(message):
-			user = message.author
-			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
-		while moves <= 9:
-			try:
-				m = await self.bot.wait_for("message",timeout=60.0,check=check)
-			except asyncio.exceptions.TimeoutError:
-				await ctx.send("Game closed due to inactivity.")
-				return
-			c = m.content.lower()
-			if c in ["as","ds","aw","dw"]:
-				c = c[::-1]
-			og = g
-			char = "X" if moves % 2 == 1 else "O"
-			if c == "q":
-				await ctx.send("Game closed.")
-				return
-			if c == "r":
-				title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
-				msgembed = discord.Embed(title=title)
-				msgembed.description = gs
-				bmsg = await ctx.send(embed=msgembed)
-				savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
-				msgembed.set_footer(text=savestate)
-				continue
-			if c == "wa":
-				g = g.replace("1",char)
-			elif c == "w":
-				g = g.replace("2",char)
-			elif c == "wd":
-				g = g.replace("3",char)
-			elif c == "a":
-				g = g.replace("4",char)
-			elif c == ".":
-				g = g.replace("5",char)
-			elif c == "d":
-				g = g.replace("6",char)
-			elif c == "sa":
-				g = g.replace("7",char)
-			elif c == "s":
-				g = g.replace("8",char)
-			elif c == "sd":
-				g = g.replace("9",char)
-			else:
-				continue
-			if og != g:
-				moves += 1
-			try:
-				await m.delete()
-			except discord.Forbidden:
-				pass
-			gs = g
-			gs = gs.replace("X",":regional_indicator_x:")
-			gs = gs.replace("O",":zero:")
-			for i in gs:
-				if str(i) in "123456789":
-					gs = gs.replace(i,":blue_square:")
-			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
-			msgembed = discord.Embed(title=title)
-			msgembed.description = gs
-			savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
-			msgembed.set_footer(text=savestate)
-			await bmsg.edit(embed=msgembed)
-			glist = []
-			for i in g.split("\n"):
-				if i == "":
-					continue
-				gltmp = []
-				for j in i:
-					gltmp.append(j)
-				glist.append(gltmp)
-			if tttpy.checkWin(glist):
-				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
-				await ctx.send(f"{winner} has won!")
-				return
-			elif moves > 9:
-				await ctx.send("Nobody won, the game is tied.")
-				return
+	# @commands.command(aliases=["ttt"],brief="play tic tac toe with someone",description="play tic tac toe with someone.\nthe controls are WASD, meaning that its: ```\nAW W WD\nA  .  D\nAS S SD```")
+	# async def tictactoe(self, ctx:commands.Context,member,save = None):
+	# 	global analytics
+	# 	analytics["tictactoe"] += 1
+	# 	extra.update_analytics(analytics)
+	# 	valid_t_movements = ["w", "a", "s", "d", "wa", "wd", "sa", "sd", ".", "q", "aw", "dw", "as", "sd"]
+	# 	opponent = ctx.message.mentions[0]
+	# 	await ctx.send(f"playing tic tac toe with {opponent.display_name if opponent.id != 775408192242974726 else 'an AI'}")
+	# 	if save is not None:
+	# 		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+	# 		g = base[0]
+	# 		moves = int(base[1])
+	# 	else:
+	# 		g = tttpy.generategrid()
+	# 		moves = 1
+	# 	gs = g
+	# 	gs = gs.replace("X",":regional_indicator_x:")
+	# 	gs = gs.replace("O",":zero:")
+	# 	for i in gs:
+	# 		if str(i) in "123456789":
+	# 			gs = gs.replace(i,":blue_square:")
+	# 	title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+	# 	msgembed = discord.Embed(title=title)
+	# 	msgembed.description = gs
+	# 	savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+	# 	msgembed.set_footer(text=savestate)
+	# 	bmsg = await ctx.send(embed=msgembed)
+	# 	def check(message):
+	# 		user = message.author
+	# 		return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_t_movements or message.content)) or message.content in ["q","r"]
+	# 	while moves <= 9:
+	# 		try:
+	# 			m = await self.bot.wait_for("message",timeout=60.0,check=check)
+	# 		except asyncio.exceptions.TimeoutError:
+	# 			await ctx.send("Game closed due to inactivity.")
+	# 			return
+	# 		c = m.content.lower()
+	# 		if c in ["as","ds","aw","dw"]:
+	# 			c = c[::-1]
+	# 		og = g
+	# 		char = "X" if moves % 2 == 1 else "O"
+	# 		if c == "q":
+	# 			await ctx.send("Game closed.")
+	# 			return
+	# 		if c == "r":
+	# 			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+	# 			msgembed = discord.Embed(title=title)
+	# 			msgembed.description = gs
+	# 			bmsg = await ctx.send(embed=msgembed)
+	# 			savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+	# 			msgembed.set_footer(text=savestate)
+	# 			continue
+	# 		if c == "wa":
+	# 			g = g.replace("1",char)
+	# 		elif c == "w":
+	# 			g = g.replace("2",char)
+	# 		elif c == "wd":
+	# 			g = g.replace("3",char)
+	# 		elif c == "a":
+	# 			g = g.replace("4",char)
+	# 		elif c == ".":
+	# 			g = g.replace("5",char)
+	# 		elif c == "d":
+	# 			g = g.replace("6",char)
+	# 		elif c == "sa":
+	# 			g = g.replace("7",char)
+	# 		elif c == "s":
+	# 			g = g.replace("8",char)
+	# 		elif c == "sd":
+	# 			g = g.replace("9",char)
+	# 		else:
+	# 			continue
+	# 		if og != g:
+	# 			moves += 1
+	# 		try:
+	# 			await m.delete()
+	# 		except discord.Forbidden:
+	# 			pass
+	# 		gs = g
+	# 		gs = gs.replace("X",":regional_indicator_x:")
+	# 		gs = gs.replace("O",":zero:")
+	# 		for i in gs:
+	# 			if str(i) in "123456789":
+	# 				gs = gs.replace(i,":blue_square:")
+	# 		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+	# 		msgembed = discord.Embed(title=title)
+	# 		msgembed.description = gs
+	# 		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
+	# 		msgembed.set_footer(text=savestate)
+	# 		await bmsg.edit(embed=msgembed)
+	# 		glist = []
+	# 		for i in g.split("\n"):
+	# 			if i == "":
+	# 				continue
+	# 			gltmp = []
+	# 			for j in i:
+	# 				gltmp.append(j)
+	# 			glist.append(gltmp)
+	# 		if tttpy.checkWin(glist):
+	# 			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
+	# 			await ctx.send(f"{winner} has won!")
+	# 			return
+	# 		elif moves > 9:
+	# 			await ctx.send("Nobody won, the game is tied.")
+	# 			return
 
 
 	@commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.\ncodes are:\n{0}".format('\n'.join(extra.list_layouts("c4layouts.json"))))

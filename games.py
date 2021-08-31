@@ -23,31 +23,31 @@ class Games(commands.Cog):
 		self.bot = bot
 		self._last_member = None
 	
-	@commands.command(aliases=["ms"],brief="generate minesweeper board")
-	async def minesweeper(self, ctx:commands.Context, length: int = 6, width: int = 6, mines: int = 7):
-		global analytics
-		analytics["minesweeper"] += 1
-		extra.update_analytics(analytics)
-		if length * width > 196:
-			await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
-			return
-		if mines >= (length * width):
-			mines = (length * width) - 1
-		gridstr = minespy.generategrid(length,width,mines)
-		while "0" in gridstr or "1" in gridstr or "2" in gridstr or "3" in gridstr or "4" in gridstr or "5" in gridstr or "6" in gridstr or "7" in gridstr or "7" in gridstr or "B" in gridstr: # stole this from stackoverflow
-			gridstr = gridstr.replace("0","||:zero:||")
-			gridstr = gridstr.replace("1","||:one:||")
-			gridstr = gridstr.replace("2","||:two:||")
-			gridstr = gridstr.replace("3","||:three:||")
-			gridstr = gridstr.replace("4","||:four:||")
-			gridstr = gridstr.replace("5","||:five:||")
-			gridstr = gridstr.replace("6","||:six:||")
-			gridstr = gridstr.replace("7","||:seven:||")
-			gridstr = gridstr.replace("8","||:eight:||")
-			gridstr = gridstr.replace("B","||:boom:||")
-		gridstr = extra.replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
-		embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
-		await ctx.send(embed=embed)
+	# @commands.command(aliases=["ms"],brief="generate minesweeper board")
+	# async def minesweeper(self, ctx:commands.Context, length: int = 6, width: int = 6, mines: int = 7):
+	# 	global analytics
+	# 	analytics["minesweeper"] += 1
+	# 	extra.update_analytics(analytics)
+	# 	if length * width > 196:
+	# 		await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
+	# 		return
+	# 	if mines >= (length * width):
+	# 		mines = (length * width) - 1
+	# 	gridstr = minespy.generategrid(length,width,mines)
+	# 	while "0" in gridstr or "1" in gridstr or "2" in gridstr or "3" in gridstr or "4" in gridstr or "5" in gridstr or "6" in gridstr or "7" in gridstr or "7" in gridstr or "B" in gridstr: # stole this from stackoverflow
+	# 		gridstr = gridstr.replace("0","||:zero:||")
+	# 		gridstr = gridstr.replace("1","||:one:||")
+	# 		gridstr = gridstr.replace("2","||:two:||")
+	# 		gridstr = gridstr.replace("3","||:three:||")
+	# 		gridstr = gridstr.replace("4","||:four:||")
+	# 		gridstr = gridstr.replace("5","||:five:||")
+	# 		gridstr = gridstr.replace("6","||:six:||")
+	# 		gridstr = gridstr.replace("7","||:seven:||")
+	# 		gridstr = gridstr.replace("8","||:eight:||")
+	# 		gridstr = gridstr.replace("B","||:boom:||")
+	# 	gridstr = extra.replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
+	# 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
+	# 	await ctx.send(embed=embed)
 
 	@commands.command(brief="play rock paper scissors with someone")
 	async def rps(self, ctx:commands.Context,member):

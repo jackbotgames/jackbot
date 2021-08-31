@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 from datetime import datetime
 from os import terminal_size
 from sys import argv as cliargs
@@ -7,8 +8,12 @@ import json
 import discord # discord library
 from discord.ext import commands  # discord library extension to make stuff easier
 from discord_slash import SlashCommand, SlashContext
+from discord_slash.context import ComponentContext
 from discord_slash.model import SlashCommandOptionType
 from discord_slash.utils.manage_commands import create_option # slash commands
+from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
+from discord_slash.model import ButtonStyle
+
 import random
 from libs import *
 
@@ -134,6 +139,34 @@ async def minesweeper(ctx:SlashContext, length: int = 6, width: int = 6, mines: 
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
 	await ctx.send(embed=embed)
 
+@slash.slash(name='rockpaperscissors',description="play rock paper scissors with someone",options=[create_option(name='member',description='The person you\'re playing with',option_type=SlashCommandOptionType.USER,required=True)])
+async def rps(ctx:SlashContext,member:discord.Member):
+	global analytics
+	analytics["rps"] += 1
+	extra.update_analytics(analytics)
+	components = create_actionrow(create_button(style=ButtonStyle.blue,label="Rock",emoji=u"\U0001f5ff"),create_button(style=ButtonStyle.green,label="Paper",emoji=u"\U0001f4f0"),create_button(style=ButtonStyle.red,label="Scissors",emoji=u"\u2702"))
+	await ctx.send("Rock, paper, or scissors?",components=[components])
+	button_ctx:ComponentContext = await wait_for_component(client,components=components,check=lambda c_ctx:c_ctx.author == ctx.author or c_ctx.author == member)
+	await button_ctx.send(f"Chosen {button_ctx.component['label']}",hidden=True)
+	button_ctx_2:ComponentContext = await wait_for_component(client,components=components,check=lambda c_ctx:c_ctx.author == ctx.author or c_ctx.author == member)
+	# await button_ctx_2.send(f"{button_ctx_2.author.display_name} has chosen!")
+	winner:discord.Member = None
+	description = ""
+	if button_ctx.component['label'] == "Paper" and button_ctx_2.component['label'] == "Rock": # paper > rock
+		winner = button_ctx.author
+	elif button_ctx.component['label'] == "Scissors" and button_ctx_2.component['label'] == "Paper": # scissors > paper
+		winner = button_ctx.author
+	elif button_ctx.component['label'] == "Rock" and button_ctx_2.component['label'] == "Scissors": # rock > scissors
+		winner = button_ctx.author
+	elif button_ctx.component['label'] == button_ctx_2.component['label']:
+		description = f"{button_ctx.component['emoji']['name']}   v   {button_ctx_2.component['emoji']['name']}\n\n\nIt's a tie!"
+	else:
+		winner = button_ctx_2.author
+	if not description:
+		description = f"{button_ctx.component['emoji']['name']}   v   {button_ctx_2.component['emoji']['name']}\n\n\n{winner.display_name} won!"
+	game_embed = discord.Embed(title=f"{button_ctx.author.display_name} v {button_ctx_2.author.display_name}",description=description)
+	await button_ctx_2.send(embed=game_embed)
+
 @slash.slash(description="show repo",name='repo')
 async def repo(ctx:SlashContext):
 	await ctx.send(embed=repomsg,hidden=True)
@@ -187,7 +220,10 @@ async def coinflip(ctx:SlashContext,hidden:bool = False):
 
 @slash.slash(description="show jack")
 async def jack(ctx:SlashContext,hidden:bool = False):
-	await ctx.send("<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>\n<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>\n<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>",hidden=hidden)
+	await ctx.send("""\
+<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>
+<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>
+<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>""",hidden=hidden)
 
 client.run(token)
 

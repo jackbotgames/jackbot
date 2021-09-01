@@ -192,19 +192,19 @@ async def tictactoe(ctx:SlashContext,opponent:discord.Member,save:str = None):
 	msgembed.set_footer(text=savestate)
 	components = [
 		create_actionrow(
-			create_button(style=ButtonStyle.blue,label="Up Left",custom_id="wa"),
-			create_button(style=ButtonStyle.blue,label="Up",custom_id="w"),
-			create_button(style=ButtonStyle.blue,label="Up Right",custom_id="wd")
+			create_button(style=ButtonStyle.blue,custom_id="wa",emoji="\u2196\uFE0F"),
+			create_button(style=ButtonStyle.blue,custom_id="w",emoji="\u2B06\uFE0F"),
+			create_button(style=ButtonStyle.blue,custom_id="wd",emoji="\u2197\uFE0F")
 		),
 		create_actionrow(
-			create_button(style=ButtonStyle.blue,label="Left",custom_id="a"),
-			create_button(style=ButtonStyle.blue,label="Center",custom_id="."),
-			create_button(style=ButtonStyle.blue,label="Right",custom_id="d")
+			create_button(style=ButtonStyle.blue,custom_id="a",emoji="\u2B05\uFE0F"),
+			create_button(style=ButtonStyle.blue,custom_id=".",emoji="\u2B1C"),
+			create_button(style=ButtonStyle.blue,custom_id="d",emoji="\u27A1\uFE0F")
 		),
 		create_actionrow(
-			create_button(style=ButtonStyle.blue,label="Down Left",custom_id="sa"),
-			create_button(style=ButtonStyle.blue,label="Down",custom_id="s"),
-			create_button(style=ButtonStyle.blue,label="Down Right",custom_id="sd")
+			create_button(style=ButtonStyle.blue,custom_id="sa",emoji="\u2199\uFE0F"),
+			create_button(style=ButtonStyle.blue,custom_id="s",emoji="\u2B07\uFE0F"),
+			create_button(style=ButtonStyle.blue,custom_id="sd",emoji="\u2198\uFE0F")
 		),
 		create_actionrow(
 			create_button(style=ButtonStyle.red,label="Exit",custom_id="q"),
@@ -212,7 +212,7 @@ async def tictactoe(ctx:SlashContext,opponent:discord.Member,save:str = None):
 	]
 	await ctx.send(embed=msgembed,components=components)
 	while moves <= 9:
-		button_ctx:ComponentContext = await wait_for_component(client,components=components,check=lambda c_ctx: c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent)
+		button_ctx:ComponentContext = await wait_for_component(client,components=components,check=lambda c_ctx: (c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent) or c_ctx.component['custom_id'] == 'q')
 		og = g
 		char = "X" if moves % 2 == 1 else "O"
 		if button_ctx.custom_id == "q":

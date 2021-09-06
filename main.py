@@ -65,29 +65,6 @@ async def on_guild_join(guild:discord.Guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
 
-@client.event
-async def on_command_error(ctx:commands.Context, exception):
-	embed = discord.Embed(color=discord.Color.red())
-	if type(exception) is commands.errors.MissingRequiredArgument:
-		embed.title = "You forgot an argument"
-		embed.description = f"The syntax to `{client.command_prefix}{ctx.invoked_with}` is `{client.command_prefix}{ctx.invoked_with} {ctx.command.signature}`."
-		await ctx.send(embed=embed)
-	elif type(exception) is commands.CommandNotFound:
-		embed.title = "Invalid command"
-		embed.description = f"The command you just tried to use is invalid. Use `{client.command_prefix}help` to see all commands."
-		await ctx.send(embed=embed)
-	elif type(exception) is commands.errors.CommandInvokeError:
-		embed.title = "Invalid permissions"
-		embed.description = "Somebody tried to use me in a channel where I can't talk."
-		for channel in ctx.guild.channels:
-			try:
-				await channel.send(embed=embed)
-				break
-			except: pass
-	else:
-		print('Ignoring exception in command {}:'.format(ctx.command), file=sys.stderr)
-		traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
-
 client.run(token)
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

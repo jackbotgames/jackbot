@@ -50,7 +50,7 @@ client.add_cog(fun.Fun(client))
 @client.event
 async def on_ready():
 	print(f"logged in as {client.user}")
-	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=8192&scope=bot%20applications.commands")
+	print(f"https://discord.com/oauth2/authorize?client_id={client.user.id}&permissions=0&scope=bot%20applications.commands")
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}")
 	print(f"In {len(client.guilds)} guilds")

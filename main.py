@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-import asyncio
 from datetime import datetime
-from os import terminal_size
 from sys import argv as cliargs
 import json
 import discord # discord library
@@ -10,14 +8,14 @@ from discord.ext import commands  # discord library extension to make stuff easi
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.context import ComponentContext
 from discord_slash.model import SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_option # slash commands
+from discord_slash.utils.manage_commands import create_choice, create_option # slash commands
 from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
 from discord_slash.model import ButtonStyle
 import base64
 import random
 from libs import *
 
-import games
+# import games
 # import fun
 # import meta
 import traceback
@@ -52,6 +50,7 @@ if not extra.file_exists("analytics.json"):
 
 with open("analytics.json","r") as analyticsfile:
 	analytics = json.loads(analyticsfile.read())
+with open("themes.json", "r") as themesfile: themes = json.load(themesfile)
 print(f"prefix:{prefix}")
 
 client = commands.Bot(command_prefix=prefix,activity=discord.Game("starting up..."),help_command=extra.MyHelpCommand(),intents=discord.Intents.default())
@@ -75,7 +74,7 @@ async def on_ready():
 	suggestion_channel = client.get_channel(775770609191616512)
 	await log_channel.send("waking up")
 	await client.change_presence(activity=discord.Game("games"))
-	client.add_cog(games.Games(client))
+	# client.add_cog(games.Games(client))
 	# client.add_cog(meta.Meta(client))
 	t0 = datetime.now()
 
@@ -84,11 +83,6 @@ async def on_ready():
 async def on_guild_join(guild:discord.Guild):
 	print(f"Joined guild: {guild.name}")
 	await log_channel.send("joined a guild")
-
-@client.event
-async def on_command_completion(ctx:commands.Context):
-	if ctx.cog == games.Games:
-		await client.change_presence(activity=discord.Game(ctx.command.name))
 
 @client.event
 async def on_command_error(ctx:commands.Context, exception):
@@ -114,7 +108,7 @@ async def on_command_error(ctx:commands.Context, exception):
 		traceback.print_exception(type(exception), exception, exception.__traceback__, file=sys.stderr)
 
 @slash.slash(name='minesweeper',description="generate minesweeper board")
-async def minesweeper(ctx:SlashContext, length: int = 6, width: int = 6, mines: int = 7):
+async def minesweeper(ctx:SlashContext, length: int = 6, width: int = 6, mines: int = 7,hidden:bool = False):
 	global analytics
 	analytics["minesweeper"] += 1
 	extra.update_analytics(analytics)
@@ -137,9 +131,9 @@ async def minesweeper(ctx:SlashContext, length: int = 6, width: int = 6, mines: 
 		gridstr = gridstr.replace("B","||:boom:||")
 	gridstr = extra.replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
 	embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
-	await ctx.send(embed=embed)
+	await ctx.send(embed=embed,hidden=hidden)
 
-@slash.slash(name='rockpaperscissors',description="play rock paper scissors with someone",options=[create_option(name='member',description='The person you\'re playing with',option_type=SlashCommandOptionType.USER,required=True)])
+@slash.slash(name='rockpaperscissors',description="play rock paper scissors with someone")
 async def rps(ctx:SlashContext,member:discord.Member):
 	global analytics
 	analytics["rps"] += 1
@@ -268,6 +262,101 @@ async def tictactoe(ctx:SlashContext,opponent:discord.Member,save:str = None):
 			await ctx.send("Nobody won, the game is tied.")
 			return
 
+@slash.slash(name='connect4',description="play connect four with someone")
+async def connectfour(ctx:SlashContext,opponent:discord.Member,save:str = None):
+	tiles_list = themes[random.choice(list(themes))]
+	global analytics
+	analytics["connectfour"] += 1
+	extra.update_analytics(analytics)
+	with open("c4layouts.json", "r") as c4layoutsfile:
+		c4layouts = json.loads(c4layoutsfile.read())
+	if (save in c4layouts):
+		save = c4layouts[save]
+	if save is not None:
+		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+		g = json.loads(base[0].replace("'",'"'))
+		moves = int(base[1])
+	else:
+		g = ["       \n" for _ in range(7)]
+		moves = 1
+		base = None
+	if base is not None:
+		pass
+	gridstr = "".join(g[::-1])
+	theme = random.choice(list(themes))
+	tiles_list = dict(themes[theme])
+	nums_list = "".join(tiles_list["nums"])
+	gridstr += nums_list
+	tiles_list.pop("nums")
+	for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
+	if len(gridstr) > 2048:
+		await ctx.send("The grid is too big!")
+		return
+	components = [
+		create_actionrow(
+			create_button(style=ButtonStyle.blue,label="1",custom_id="1"),
+			create_button(style=ButtonStyle.blue,label="2",custom_id="2"),
+			create_button(style=ButtonStyle.blue,label="3",custom_id="3"),
+		),
+		create_actionrow(
+			create_button(style=ButtonStyle.blue,label="4",custom_id="4"),
+			create_button(style=ButtonStyle.blue,label="5",custom_id="5"),
+			create_button(style=ButtonStyle.blue,label="6",custom_id="6"),
+		),
+		create_actionrow(
+			create_button(style=ButtonStyle.red,label="Quit",custom_id="q"),
+			create_button(style=ButtonStyle.blue,label="7",custom_id="7"),
+		)
+	]
+	msgembed = discord.Embed(title=title)
+	msgembed.description = gridstr
+	savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+	msgembed.set_footer(text=savestate)
+	await ctx.send(embed=msgembed,components=components)
+
+	while moves <= 42:
+		def check(message):
+			user = message.author
+			return user == opponent if moves % 2 == 0 else user == ctx.author
+		button_ctx:ComponentContext = await wait_for_component(client,components=components,check=check)
+		if button_ctx.custom_id == "q":
+			await ctx.send("game ended")
+			return
+		bg = list(g)
+		for y in g:
+			# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
+			if not y[int(button_ctx.custom_id) - 1] == " ": continue
+			t = list(y)
+			t[int(button_ctx.custom_id) - 1] = "X" if moves % 2 == 1 else "O"
+			g[g.index(y)] = "".join(t)
+			break
+		moves += 1 if bg != g else 0
+		gridstr = "".join(g[::-1])
+		for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+		gridstr += nums_list
+		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
+		msgembed = discord.Embed(title=title)
+		msgembed.description = gridstr
+		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+		msgembed.set_footer(text=savestate)
+		await button_ctx.edit_origin(embed=msgembed)
+		glist = []
+		for i in g:
+			if i == "\n":
+				continue
+			gltmp = []
+			for j in i:
+				gltmp.append(j)
+			glist.append(gltmp)
+		if c4py.check_win(glist,"X") or c4py.check_win(glist,"O"):
+			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
+			await ctx.send(f"{winner} has won!")
+			return
+		elif moves > 42:
+			await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
+			return
+
 @slash.slash(description="show repo",name='repo')
 async def repo(ctx:SlashContext):
 	await ctx.send(embed=repomsg,hidden=True)
@@ -276,14 +365,14 @@ async def repo(ctx:SlashContext):
 async def invite(ctx:SlashContext):
 	await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY",hidden=True)
 
-@slash.slash(description="send bug report to bugs channel in support discord",name='bugreport',options=[create_option(name='report',description='the bug',option_type=SlashCommandOptionType.STRING,required=True)])
-async def bugreport(ctx:SlashContext,report):
+@slash.slash(description="send bug report to bugs channel in support discord",name='bugreport')
+async def bugreport(ctx:SlashContext,report:str):
 	guild = "Unknown" if ctx.guild is None else ctx.guild.name
 	await bug_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{report}")
 	await log_channel.send("received a bug report")
 	await ctx.send("Report received!",hidden=True)
 
-@slash.slash(description="send suggestion to feature requests channel in support discord",name='suggestion',options=[create_option(name='suggestion',description='the suggestion',option_type=SlashCommandOptionType.STRING,required=True)])
+@slash.slash(description="send suggestion to feature requests channel in support discord",name='suggestion')
 async def suggestion(ctx:SlashContext,suggestion):
 	guild = "Unknown" if ctx.guild is None else ctx.guild.name
 	await suggestion_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{suggestion}")

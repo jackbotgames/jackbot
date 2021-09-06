@@ -210,98 +210,98 @@ class Games(commands.Cog):
 	# 			return
 
 
-	@commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.\ncodes are:\n{0}".format('\n'.join(extra.list_layouts("c4layouts.json"))))
-	async def connectfour(self, ctx:commands.Context,member,save = None):
-		tiles_list = themes[random.choice(list(themes))]
-		global analytics
-		analytics["connectfour"] += 1
-		extra.update_analytics(analytics)
-		valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
-		opponent = ctx.message.mentions[0]
-		with open("c4layouts.json", "r") as c4layoutsfile:
-			c4layouts = json.loads(c4layoutsfile.read())
-		await ctx.send(f"playing connect 4 with {opponent.display_name}")
-		if (save in c4layouts):
-			save = c4layouts[save]
-		if save is not None:
-			base = base64.b64decode(save.encode()).decode("utf-8").split("|")
-			g = json.loads(base[0].replace("'",'"'))
-			moves = int(base[1])
-		else:
-			g = ["       \n" for _ in range(7)]
-			moves = 1
-			base = None
-		if base is not None:
-			pass
-		gridstr = "".join(g[::-1])
-		theme = random.choice(list(themes))
-		tiles_list = dict(themes[theme])
-		nums_list = "".join(tiles_list["nums"])
-		gridstr += nums_list
-		tiles_list.pop("nums")
-		for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
-		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
-		if len(gridstr) > 2048:
-			await ctx.send("The grid is too big!")
-			return
-		msgembed = discord.Embed(title=title)
-		msgembed.description = gridstr
-		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
-		msgembed.set_footer(text=savestate)
-		bmsg = await ctx.send(embed=msgembed)
-		while moves <= 42:
-			def check(message):
-				user = message.author
-				return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_c_movements or message.content)) or (message.content in ["q","r"] and (user == opponent or user == ctx.author))
-			m = await self.bot.wait_for("message",timeout=None,check=check)
-			c = m.content
-			if c not in valid_c_movements:
-				continue
-			if c == "q":
-				await ctx.send("game ended")
-				return
-			elif c == "r":
-				title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
-				msgembed = discord.Embed(title=title)
-				msgembed.description = gridstr
-				savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
-				msgembed.set_footer(text=savestate)
-				bmsg = await ctx.send(embed=msgembed)
-				continue
-			bg = list(g)
-			if c in "1234567":
-				for y in g:
-					# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
-					if not y[int(c) - 1] == " ": continue
-					t = list(y)
-					t[int(c) - 1] = "X" if moves % 2 == 1 else "O"
-					g[g.index(y)] = "".join(t)
-					break
-				moves += 1 if bg != g else 0
-			else:
-				continue
-			gridstr = "".join(g[::-1])
-			for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
-			gridstr += nums_list
-			title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
-			msgembed = discord.Embed(title=title)
-			msgembed.description = gridstr
-			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
-			msgembed.set_footer(text=savestate)
-			await bmsg.edit(embed=msgembed)
-			await m.delete()
-			glist = []
-			for i in g:
-				if i == "\n":
-					continue
-				gltmp = []
-				for j in i:
-					gltmp.append(j)
-				glist.append(gltmp)
-			if c4py.check_win(glist,"X") or c4py.check_win(glist,"O"):
-				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
-				await ctx.send(f"{winner} has won!")
-				return
-			elif moves > 42:
-				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
-				return
+	# @commands.command(aliases=["c4"],brief="play connect four with someone",description="play connect four with someone.\n controls are the numbers 1 - 7, and the tile drops on whichever column you type in.\ncodes are:\n{0}".format('\n'.join(extra.list_layouts("c4layouts.json"))))
+	# async def connectfour(self, ctx:commands.Context,member,save = None):
+	# 	tiles_list = themes[random.choice(list(themes))]
+	# 	global analytics
+	# 	analytics["connectfour"] += 1
+	# 	extra.update_analytics(analytics)
+	# 	valid_c_movements = [ str(i) for i in range(1,8) ]; valid_c_movements.append("q"); valid_c_movements.append("r")
+	# 	opponent = ctx.message.mentions[0]
+	# 	with open("c4layouts.json", "r") as c4layoutsfile:
+	# 		c4layouts = json.loads(c4layoutsfile.read())
+	# 	await ctx.send(f"playing connect 4 with {opponent.display_name}")
+	# 	if (save in c4layouts):
+	# 		save = c4layouts[save]
+	# 	if save is not None:
+	# 		base = base64.b64decode(save.encode()).decode("utf-8").split("|")
+	# 		g = json.loads(base[0].replace("'",'"'))
+	# 		moves = int(base[1])
+	# 	else:
+	# 		g = ["       \n" for _ in range(7)]
+	# 		moves = 1
+	# 		base = None
+	# 	if base is not None:
+	# 		pass
+	# 	gridstr = "".join(g[::-1])
+	# 	theme = random.choice(list(themes))
+	# 	tiles_list = dict(themes[theme])
+	# 	nums_list = "".join(tiles_list["nums"])
+	# 	gridstr += nums_list
+	# 	tiles_list.pop("nums")
+	# 	for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+	# 	title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
+	# 	if len(gridstr) > 2048:
+	# 		await ctx.send("The grid is too big!")
+	# 		return
+	# 	msgembed = discord.Embed(title=title)
+	# 	msgembed.description = gridstr
+	# 	savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+	# 	msgembed.set_footer(text=savestate)
+	# 	bmsg = await ctx.send(embed=msgembed)
+	# 	while moves <= 42:
+	# 		def check(message):
+	# 			user = message.author
+	# 			return ((user == opponent if moves % 2 == 0 else user == ctx.author) and (message.content in valid_c_movements or message.content)) or (message.content in ["q","r"] and (user == opponent or user == ctx.author))
+	# 		m = await self.bot.wait_for("message",timeout=None,check=check)
+	# 		c = m.content
+	# 		if c not in valid_c_movements:
+	# 			continue
+	# 		if c == "q":
+	# 			await ctx.send("game ended")
+	# 			return
+	# 		elif c == "r":
+	# 			title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
+	# 			msgembed = discord.Embed(title=title)
+	# 			msgembed.description = gridstr
+	# 			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+	# 			msgembed.set_footer(text=savestate)
+	# 			bmsg = await ctx.send(embed=msgembed)
+	# 			continue
+	# 		bg = list(g)
+	# 		if c in "1234567":
+	# 			for y in g:
+	# 				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
+	# 				if not y[int(c) - 1] == " ": continue
+	# 				t = list(y)
+	# 				t[int(c) - 1] = "X" if moves % 2 == 1 else "O"
+	# 				g[g.index(y)] = "".join(t)
+	# 				break
+	# 			moves += 1 if bg != g else 0
+	# 		else:
+	# 			continue
+	# 		gridstr = "".join(g[::-1])
+	# 		for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
+	# 		gridstr += nums_list
+	# 		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
+	# 		msgembed = discord.Embed(title=title)
+	# 		msgembed.description = gridstr
+	# 		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
+	# 		msgembed.set_footer(text=savestate)
+	# 		await bmsg.edit(embed=msgembed)
+	# 		await m.delete()
+	# 		glist = []
+	# 		for i in g:
+	# 			if i == "\n":
+	# 				continue
+	# 			gltmp = []
+	# 			for j in i:
+	# 				gltmp.append(j)
+	# 			glist.append(gltmp)
+	# 		if c4py.check_win(glist,"X") or c4py.check_win(glist,"O"):
+	# 			winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
+	# 			await ctx.send(f"{winner} has won!")
+	# 			return
+	# 		elif moves > 42:
+	# 			await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
+	# 			return

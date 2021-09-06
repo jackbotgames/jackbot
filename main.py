@@ -1,41 +1,26 @@
 #!/usr/bin/env python3
 
-from datetime import datetime
 from sys import argv as cliargs
 import json
 import discord # discord library
 from discord.ext import commands  # discord library extension to make stuff easier
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.context import ComponentContext
-from discord_slash.model import SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_choice, create_option # slash commands
-from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
-from discord_slash.model import ButtonStyle
-import base64
-import random
-from libs import *
+from discord_slash import SlashCommand
+from libs import extra
+import traceback
+import sys
 
 import games
 import fun
 import meta
-import traceback
-import sys
 
 # Load prefix from -p or --prefix argument, else it is "j!"
-prefix = ""
 tokenfilename = ""
 for parameter in cliargs:
-	if parameter == "-p":
-		prefix = cliargs[cliargs.index(parameter) + 1]
-	elif parameter.startswith("--prefix"):
-		x = parameter.split("=")
-		prefix = x[1]
-	elif parameter == "-t":
+	if parameter == "-t":
 		tokenfilename = cliargs[cliargs.index(parameter) + 1]
 	elif parameter.startswith("--tokenfile"):
 		x = parameter.split("=")
 		tokenfilename = x[1]
-prefix = "j!" if prefix == "" else prefix
 tokenfilename = "tokenfile" if tokenfilename == "" else tokenfilename
 
 # read token
@@ -51,13 +36,11 @@ if not extra.file_exists("analytics.json"):
 with open("analytics.json","r") as analyticsfile:
 	analytics = json.loads(analyticsfile.read())
 with open("themes.json", "r") as themesfile: themes = json.load(themesfile)
-print(f"prefix:{prefix}")
+print(f"prefix:/")
 
-client = commands.Bot(command_prefix=prefix,activity=discord.Game("starting up..."),help_command=extra.MyHelpCommand(),intents=discord.Intents.default())
-slash = SlashCommand(client,sync_commands=True,debug_guild=775406605906870302)
+client = commands.Bot(command_prefix="/",activity=discord.Game("starting up..."),intents=discord.Intents.default())
+slash = SlashCommand(client,sync_commands=True)
 log_channel = None
-bug_channel = None
-suggestion_channel = None
 
 client.add_cog(games.Games(client))
 client.add_cog(meta.Meta(client))
@@ -71,7 +54,9 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}")
 	print(f"In {len(client.guilds)} guilds")
-	await client.get_channel(784583344188817428).send("waking up")
+	global log_channel
+	log_channel = client.get_channel(784583344188817428)
+	await log_channel.send("waking up")
 	await client.change_presence(activity=discord.Game("games"))
 
 # and also print every time it joins a guild

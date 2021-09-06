@@ -197,7 +197,7 @@ class Games(commands.Cog):
 			g = json.loads(base[0].replace("'",'"'))
 			moves = int(base[1])
 		else:
-			g = ["       \n" for _ in range(7)]
+			g = ["       \n" for _ in range(6)]
 			moves = 1
 			base = None
 		if base is not None:

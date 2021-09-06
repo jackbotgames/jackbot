@@ -3,7 +3,6 @@ from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 import json
 from datetime import datetime
-from libs import extra
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 guild_ids=[775406605906870302]

@@ -295,7 +295,7 @@ class Games(commands.Cog):
 		dealer_draws = 1
 		player_cards = random.randint(1,10) + random.randint(1,10)
 		dealer_cards = random.randint(1,10) + random.randint(1,10)
-		embed = discord.Embed(title="Blackjack",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
+		embed = discord.Embed(title=f"Blackjack for <a:goldcoin:801148801653276693>{bet}",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
 		await ctx.send(embeds=[embed],components=components,hidden=True)
 		while player_cards < 21:
 			button_ctx = await wait_for_component(client=self.bot,components=components)
@@ -307,21 +307,22 @@ class Games(commands.Cog):
 				while dealer_cards <= 17:
 					dealer_cards += random.randint(1,10)
 					dealer_draws += 1
-			embed = discord.Embed(title=f"Blackjack for {bet} shmeckles",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
+			embed = discord.Embed(title=f"Blackjack for <a:goldcoin:801148801653276693>{bet}",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
 			await button_ctx.send(embeds=[embed],hidden=True,components=components)
 			if player_cards > 21:
-				await button_ctx.send("You lose!",hidden=True)
+				await button_ctx.send(f"You lose! -<a:goldcoin:801148801653276693>{bet}.",hidden=True)
 				win = -1
 				break
 			if dealer_cards > 21 or (dealer_cards >= 17 and player_cards > dealer_cards):
-				await button_ctx.send("You win!",hidden=True)
+				await button_ctx.send(f"You win! +<a:goldcoin:801148801653276693>{bet}.",hidden=True)
 				win = 1
 				break
 			if dealer_cards == 21 and (player_cards == dealer_cards):
 				await button_ctx.send("It's a draw!",hidden=True)
 				return
 		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
-		con.execute("UPDATE users SET money = ? WHERE id = ?",(money + (money * win),str(ctx.author_id)))
+		await ctx.send(f"You now have a total of <a:goldcoin:801148801653276693>{money + (bet * win)}.",hidden=True)
+		con.execute("UPDATE users SET money = ? WHERE id = ?",(money + (bet * win),str(ctx.author_id)))
 		con.commit()
 
 

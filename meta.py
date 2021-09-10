@@ -73,4 +73,4 @@ class Meta(commands.Cog):
 		for user in cur.execute("SELECT * FROM users"):
 			if user[0] == str(member.id):
 				money = user[1]
-		await ctx.send(f"{member.mention} has {money} shmeckles.",hidden=True)
+		await ctx.send(f"{member.mention} has <a:goldcoin:801148801653276693>{money + 1}.",hidden=True)

@@ -49,7 +49,7 @@ client.add_cog(fun.Fun(client))
 
 con = sqlite3.connect("users.db")
 cur = con.cursor()
-try: cur.execute("CREATE TABLE users (id text PRIMARY KEY, money int, username text)")
+try: con.execute("CREATE TABLE users (id text PRIMARY KEY, money int)")
 except sqlite3.OperationalError: pass
 con.commit()
 
@@ -78,11 +78,10 @@ async def on_slash_command(ctx:SlashContext):
 	bonus = 1
 	if ctx.cog.qualified_name == "Games":
 		bonus = 3
-	if len(con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.author_id),))) == 0:
-		con.execute("INSERT INTO users VALUES (?,?,?)",(str(ctx.author_id),0,ctx.author.name))
+	if len(list(con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.author_id),)))) == 0:
+		con.execute("INSERT INTO users VALUES (?,?)",(str(ctx.author_id),0))
 	user = list(con.execute("SELECT * FROM users WHERE id = ?",(str(ctx.author_id),)))[0]
 	con.execute("UPDATE users SET money = ? WHERE id = ?",(user[1] + bonus,str(ctx.author_id)))
-	con.execute("UPDATE users SET username = ? WHERE id = ?",(f"{ctx.author}",str(ctx.author_id)))
 	con.commit()
 
 client.run(token)

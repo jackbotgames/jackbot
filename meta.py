@@ -74,7 +74,7 @@ class Meta(commands.Cog):
 			if user[0] == str(member.id):
 				money = user[1]
 		if money is None:
-			cur.execute("INSERT INTO users VALUES (?,?)",(str(member.id),0))
+			cur.execute("INSERT INTO users VALUES (?,?,?)",(str(member.id),0))
 			con.commit()
 		await ctx.send(f"{member.mention} has {money} shmeckles.",hidden=True)
 		

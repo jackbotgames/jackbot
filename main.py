@@ -78,9 +78,11 @@ async def on_slash_command(ctx:SlashContext):
 	bonus = 1
 	if ctx.cog.qualified_name == "Games":
 		bonus = 3
-	user = list(cur.execute("SELECT * FROM users WHERE id = ?",(str(ctx.author_id),)))[0]
-	cur.execute("UPDATE users SET money = ? WHERE id = ?",(user[1] + bonus,str(ctx.author_id)))
-	cur.execute("UPDATE users SET username = ? WHERE id = ?",(f"{ctx.author}",str(ctx.author_id)))
+	try: con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.author_id),))
+	except: con.execute("INSERT INTO users VALUES (?,?,?)",(str(ctx.author_id),0,ctx.author.name))
+	user = list(con.execute("SELECT * FROM users WHERE id = ?",(str(ctx.author_id),)))[0]
+	con.execute("UPDATE users SET money = ? WHERE id = ?",(user[1] + bonus,str(ctx.author_id)))
+	con.execute("UPDATE users SET username = ? WHERE id = ?",(f"{ctx.author}",str(ctx.author_id)))
 	con.commit()
 
 client.run(token)

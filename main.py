@@ -43,7 +43,7 @@ client = commands.Bot(command_prefix=" ",activity=discord.Game("starting up...")
 slash = SlashCommand(client,sync_commands=True,debug_guild=None if tokenfilename == "tokenfile" else 775406605906870302)
 log_channel = None
 
-client.add_cog(games_cog := games.Games(client))
+client.add_cog(games.Games(client))
 client.add_cog(meta.Meta(client))
 client.add_cog(fun.Fun(client))
 

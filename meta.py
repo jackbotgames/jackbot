@@ -3,6 +3,8 @@ from discord.ext import commands
 from discord_slash import cog_ext, SlashContext
 import json
 from datetime import datetime
+import sqlite3
+
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 guild_ids=[775406605906870302]
@@ -28,7 +30,7 @@ class Meta(commands.Cog):
 
 	@cog_ext.cog_slash(description="give link to support server",name='invite')
 	async def invite(self,ctx:SlashContext):
-		await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY",hidden=True)
+		await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY\nalso invite jackbot https://discord.com/oauth2/authorize?client_id=775408192242974726&permissions=0&scope=bot%20applications.commands",hidden=True)
 
 	@cog_ext.cog_slash(description="send bug report to bugs channel in support discord",name='bugreport')
 	async def bugreport(self,ctx:SlashContext,report:str):
@@ -59,3 +61,20 @@ class Meta(commands.Cog):
 	@cog_ext.cog_slash(description="show latency",name='ping')
 	async def ping(self,ctx:SlashContext):
 		await ctx.send(f"Pong! {int(self.bot.latency * 1000)}ms",hidden=True)
+	
+	@cog_ext.cog_slash(name='shmeckles',description='Get the amount of shmeckles of a user')
+	async def shmeckles(self,ctx:SlashContext,member:discord.Member = None):
+		if member is None:
+			member = ctx.author
+		con = sqlite3.connect("users.db")
+		cur = con.cursor()
+		con.commit()
+		money = None
+		for user in cur.execute("SELECT * FROM users"):
+			if user[0] == str(member.id):
+				money = user[1]
+		if money is None:
+			cur.execute("INSERT INTO users VALUES (?,?)",(str(member.id),0))
+			con.commit()
+		await ctx.send(f"{member.mention} has {money} shmeckles.",hidden=True)
+		

@@ -1,9 +1,13 @@
+import asyncio
+from re import T
 import discord
 from discord.ext import commands
+from discord.ext.commands import cog
 from discord_slash import SlashContext,cog_ext
 from discord_slash.context import ComponentContext
 from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
 from discord_slash.model import ButtonStyle
+import sqlite3
 
 from libs import c4py, extra, minespy, tttpy
 import random
@@ -59,10 +63,10 @@ class Games(commands.Cog):
 		analytics["rps"] += 1
 		extra.update_analytics(analytics)
 		components = create_actionrow(create_button(style=ButtonStyle.blue,label="Rock",emoji=u"\U0001f5ff"),create_button(style=ButtonStyle.green,label="Paper",emoji=u"\U0001f4f0"),create_button(style=ButtonStyle.red,label="Scissors",emoji=u"\u2702"))
-		await ctx.send("Rock, paper, or scissors?",components=[components])
+		await ctx.send(f"{ctx.author.mention} {member.mention} Rock, paper, or scissors?",components=[components])
 		button_ctx:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx:c_ctx.author == ctx.author or c_ctx.author == member)
 		await button_ctx.send(f"Chosen {button_ctx.component['label']}",hidden=True)
-		button_ctx_2:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx:c_ctx.author == ctx.author or c_ctx.author == member)
+		button_ctx_2:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx:(c_ctx.author == ctx.author or c_ctx.author == member) and c_ctx.author != button_ctx.author)
 		# await button_ctx_2.send(f"{button_ctx_2.author.display_name} has chosen!")
 		winner:discord.Member = None
 		description = ""
@@ -106,25 +110,25 @@ class Games(commands.Cog):
 		msgembed.set_footer(text=savestate)
 		components = [
 			create_actionrow(
-				create_button(style=ButtonStyle.blue,custom_id="wa",emoji="\u2196\uFE0F"),
-				create_button(style=ButtonStyle.blue,custom_id="w",emoji="\u2B06\uFE0F"),
-				create_button(style=ButtonStyle.blue,custom_id="wd",emoji="\u2197\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="wa",emoji="\u2196\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id="w",emoji="\u2B06\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id="wd",emoji="\u2197\uFE0F")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.blue,custom_id="a",emoji="\u2B05\uFE0F"),
-				create_button(style=ButtonStyle.blue,custom_id=".",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.blue,custom_id="d",emoji="\u27A1\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="a",emoji="\u2B05\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id=".",emoji="\u2B1C"),
+				create_button(style=ButtonStyle.gray,custom_id="d",emoji="\u27A1\uFE0F")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.blue,custom_id="sa",emoji="\u2199\uFE0F"),
-				create_button(style=ButtonStyle.blue,custom_id="s",emoji="\u2B07\uFE0F"),
-				create_button(style=ButtonStyle.blue,custom_id="sd",emoji="\u2198\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="sa",emoji="\u2199\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id="s",emoji="\u2B07\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id="sd",emoji="\u2198\uFE0F")
 			),
 			create_actionrow(
 				create_button(style=ButtonStyle.red,label="Exit",custom_id="q"),
 			)
 		]
-		await ctx.send(embed=msgembed,components=components)
+		await ctx.send(embeds=[msgembed],components=components)
 		while moves <= 9:
 			button_ctx:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx: (c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent) or c_ctx.component['custom_id'] == 'q')
 			og = g
@@ -174,6 +178,7 @@ class Games(commands.Cog):
 				for j in i:
 						gltmp.append(j)
 				glist.append(gltmp)
+			glist = []
 			if tttpy.checkWin(glist):
 				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
 				await ctx.send(f"{winner} has won!")
@@ -276,4 +281,49 @@ class Games(commands.Cog):
 			elif moves > 42:
 				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 				return
-	
+	@cog_ext.cog_slash(name='blackjack',description='Gamble away all of your shmeckles, or win the jackbot!')
+	async def blackjack(self,ctx:SlashContext,bet:int):
+		if abs(bet) != bet:
+			await ctx.send("You cannot bet a negative amount!",hidden=True)
+			return
+		con = sqlite3.connect("users.db")
+		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
+		if bet > money:
+			await ctx.send("You are betting money you don't have!",hidden=True)
+			return
+		components = [create_actionrow(create_button(style=ButtonStyle.blue,label="Hit",custom_id="h"),create_button(style=ButtonStyle.gray,label="Stand",custom_id="s"))]
+		dealer_draws = 1
+		player_cards = random.randint(1,10) + random.randint(1,10)
+		dealer_cards = random.randint(1,10) + random.randint(1,10)
+		embed = discord.Embed(title="Blackjack",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
+		await ctx.send(embeds=[embed],components=components,hidden=True)
+		while player_cards < 21:
+			button_ctx = await wait_for_component(client=self.bot,components=components)
+			if button_ctx.custom_id == "h":
+				player_cards += random.randint(1,10)
+				dealer_cards += 0 if dealer_cards >= 17 else random.randint(1,10)
+				dealer_draws += 1
+			elif button_ctx.custom_id == "s":
+				while dealer_cards <= 17:
+					dealer_cards += random.randint(1,10)
+					dealer_draws += 1
+			embed = discord.Embed(title=f"Blackjack for {bet} shmeckles",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
+			await button_ctx.send(embeds=[embed],hidden=True,components=components)
+			if player_cards > 21:
+				await button_ctx.send("You lose!",hidden=True)
+				win = -1
+				break
+			if dealer_cards > 21 or (dealer_cards >= 17 and player_cards > dealer_cards):
+				await button_ctx.send("You win!",hidden=True)
+				win = 1
+				break
+			if dealer_cards == 21 and (player_cards == dealer_cards):
+				await button_ctx.send("It's a draw!",hidden=True)
+				return
+		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
+		con.execute("UPDATE users SET money = ? WHERE id = ?",(money + (money * win),str(ctx.author_id)))
+		con.commit()
+
+
+if __name__ == "__main__":
+	import main

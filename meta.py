@@ -73,17 +73,20 @@ class Meta(commands.Cog):
 		for user in cur.execute("SELECT * FROM users"):
 			if user[0] == str(member.id):
 				money = user[1]
-		await ctx.send(f"{member.mention} has <a:goldcoin:801148801653276693>{money + (1 if member == ctx.author else 0)}.",hidden=True)
+		await ctx.send(f"{member.mention} has <a:goldcoin:801148801653276693>{money}.",hidden=True)
 
 	@cog_ext.cog_slash(name='give',description='Gives someone an amount of money')
 	async def give(self,ctx:SlashContext,member:discord.Member,amount:int):
+		if member == ctx.author:
+			await ctx.send("You cannot give yourself money!",hidden=True)
+			return
 		if abs(amount) != amount:
-			await ctx.send("You cannot give someone negative money!")
+			await ctx.send("You cannot give someone negative money!",hidden=True)
 			return
 		con = sqlite3.connect("users.db")
 		giver_money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
 		if giver_money < amount:
-			await ctx.send("You cannot give someone money you don't have!")
+			await ctx.send("You cannot give someone money you don't have!",hidden=True)
 			return
 		taker_money = list(con.execute("SELECT money FROM users WHERE id = ?",(member.id,)))[0][0]
 		con.execute("UPDATE users SET money = ? WHERE id = ?",(giver_money - amount,ctx.author_id))

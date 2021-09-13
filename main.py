@@ -75,9 +75,13 @@ async def on_guild_join(guild:discord.Guild):
 
 @client.event
 async def on_slash_command(ctx:SlashContext):
-	bonus = 1
+	bonus = None
 	if ctx.cog.qualified_name == "Games":
 		bonus = 3
+	if ctx.cog.qualified_name == "Fun":
+		bonus = 2
+	if bonus is None:
+		return
 	if len(list(con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.author_id),)))) == 0:
 		con.execute("INSERT INTO users VALUES (?,?)",(str(ctx.author_id),0))
 	user = list(con.execute("SELECT * FROM users WHERE id = ?",(str(ctx.author_id),)))[0]

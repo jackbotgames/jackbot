@@ -48,11 +48,11 @@ class Fun(commands.Cog):
 		await ctx.send(f"It landed on {coin}!" + ("" if default and not bet else f"\n\nYou were {'right' if choice == coin[0] else 'wrong'}!") + betmsg,hidden=hidden)
 
 	@cog_ext.cog_slash(name="jack",description="show jack")
-	async def jack(self,ctx:SlashContext,hidden:bool = False):
+	async def jack(self,ctx:SlashContext):
 		await ctx.send("""\
-		<:jack1:784513836375212052><:jack2:784513836408504360><:jack3:784513836321079326>
-		<:jack4:784513836442189884><:jack5:784513836626477056><:jack6:784513836832522291>
-		<:jack7:784513836660031518><:jack8:784513836865814588><:jack9:784513836434325535>""".replace("	",""),hidden=hidden)
+	<:jack1:887072181262123090><:jack2:887072180951724103>
+	<:jack4:887072181442457641><:jack5:887072180544884747><:jack6:887072180679114782>
+	<:jack7:887072181262123088><:jack8:887072181752823858><:jack9:887072181505359893>""".replace("	",""))
 
 if __name__ == "__main__":
 	import main

@@ -29,7 +29,6 @@ class Games(commands.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self._last_member = None
-		
 	
 	@cog_ext.cog_slash(name='minesweeper',description="generate minesweeper board")
 	async def minesweeper(self,ctx:SlashContext, length: int = 6, width: int = 6, mines: int = 7,hidden:bool = False):
@@ -103,26 +102,26 @@ class Games(commands.Cog):
 		for i in gs:
 			if str(i) in "123456789":
 				gs = gs.replace(i,":blue_square:")
-		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+		title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Tic Tac Toe: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gs
 		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
 		msgembed.set_footer(text=savestate)
 		components = [
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="wa",emoji="\u2196\uFE0F"),
-				create_button(style=ButtonStyle.gray,custom_id="w",emoji="\u2B06\uFE0F"),
-				create_button(style=ButtonStyle.gray,custom_id="wd",emoji="\u2197\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="wa",emoji="\u2B1C"),
+				create_button(style=ButtonStyle.gray,custom_id="w",emoji="\u2B1C"),
+				create_button(style=ButtonStyle.gray,custom_id="wd",emoji="\u2B1C")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="a",emoji="\u2B05\uFE0F"),
+				create_button(style=ButtonStyle.gray,custom_id="a",emoji="\u2B1C"),
 				create_button(style=ButtonStyle.gray,custom_id=".",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="d",emoji="\u27A1\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="d",emoji="\u2B1C")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="sa",emoji="\u2199\uFE0F"),
-				create_button(style=ButtonStyle.gray,custom_id="s",emoji="\u2B07\uFE0F"),
-				create_button(style=ButtonStyle.gray,custom_id="sd",emoji="\u2198\uFE0F")
+				create_button(style=ButtonStyle.gray,custom_id="sa",emoji="\u2B1C"),
+				create_button(style=ButtonStyle.gray,custom_id="s",emoji="\u2B1C"),
+				create_button(style=ButtonStyle.gray,custom_id="sd",emoji="\u2B1C")
 			),
 			create_actionrow(
 				create_button(style=ButtonStyle.red,label="Exit",custom_id="q"),
@@ -164,7 +163,7 @@ class Games(commands.Cog):
 			for i in gs:
 				if str(i) in "123456789":
 					gs = gs.replace(i,":blue_square:")
-			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
+			title = f"Tic Tac Toe: *{ctx.author.display_name}*:regional_indicator_x: vs {opponent.display_name}:zero:" if moves % 2 == 1 else f"Tic Tac Toe: {ctx.author.display_name}:regional_indicator_x: vs *{opponent.display_name}*:zero:"
 			msgembed = discord.Embed(title=title)
 			msgembed.description = gs
 			savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
@@ -281,6 +280,7 @@ class Games(commands.Cog):
 			elif moves > 42:
 				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 				return
+	
 	@cog_ext.cog_slash(name='blackjack',description='Gamble away all of your shmeckles, or win the jackbot!')
 	async def blackjack(self,ctx:SlashContext,bet:int):
 		if abs(bet) != bet:

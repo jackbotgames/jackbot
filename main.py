@@ -71,7 +71,7 @@ async def on_ready():
 @client.event
 async def on_guild_join(guild:discord.Guild):
 	print(f"Joined guild: {guild.name}")
-	await log_channel.send("joined a guild")
+	await log_channel.send(f"joined a guild, **{guild.name}**, with **{guild.member_count}** members\nthis brings us to a total of {1} members in {len(client.guilds)} guilds")
 
 @client.event
 async def on_slash_command(ctx:SlashContext):

@@ -10,7 +10,7 @@ repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgame
 guild_ids=[775406605906870302]
 
 class Meta(commands.Cog):
-	def __init__(self, bot):
+	def __init__(self, bot:commands.Bot):
 		self.bot = bot
 		self._last_member = None
 		self.t0 = datetime.now()
@@ -30,7 +30,7 @@ class Meta(commands.Cog):
 
 	@cog_ext.cog_slash(description="give link to support server",name='invite')
 	async def invite(self,ctx:SlashContext):
-		await ctx.send("join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY\nalso invite jackbot https://discord.com/oauth2/authorize?client_id=775408192242974726&permissions=0&scope=bot%20applications.commands",hidden=True)
+		await ctx.send(f"join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY\nalso invite jackbot https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands",hidden=True)
 
 	@cog_ext.cog_slash(description="send bug report to bugs channel in support discord",name='bugreport')
 	async def bugreport(self,ctx:SlashContext,report:str):

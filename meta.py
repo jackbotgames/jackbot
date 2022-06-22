@@ -1,6 +1,5 @@
 import discord
-from discord.ext import commands
-# from discord_slash import cog_ext, SlashContext
+# from discord_slash import cog_ext, discord.ApplicationContext
 import json
 from datetime import datetime
 import sqlite3
@@ -9,8 +8,8 @@ import sqlite3
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 guild_ids=[775406605906870302]
 
-class Meta(commands.Cog):
-	def __init__(self, bot:commands.Bot):
+class Meta(discord.Cog):
+	def __init__(self, bot:discord.Bot):
 		self.bot = bot
 		self._last_member = None
 		self.t0 = datetime.now()
@@ -24,30 +23,30 @@ class Meta(commands.Cog):
 	@property
 	def suggestion_channel(self): return self.bot.get_channel(775770609191616512)
 	
-	@cog_ext.cog_slash(description="show repo",name='repo')
-	async def repo(self,ctx:SlashContext):
-		await ctx.send(embed=repomsg,hidden=True)
+	@discord.command(description="show repo",name='repo')
+	async def repo(self,ctx:discord.ApplicationContext):
+		await ctx.respond(embed=repomsg,ephemeral=True)
 
-	@cog_ext.cog_slash(description="give link to support server",name='invite')
-	async def invite(self,ctx:SlashContext):
-		await ctx.send(f"join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY\nalso invite jackbot https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands",hidden=True)
+	@discord.command(description="give link to support server",name='invite')
+	async def invite(self,ctx:discord.ApplicationContext):
+		await ctx.respond(f"join our support server for support and teasers into new features :)\nhttps://discord.gg/4pUj8vNFXY\nalso invite jackbot https://discord.com/oauth2/authorize?client_id={self.bot.user.id}&permissions=0&scope=bot%20applications.commands",ephemeral=True)
 
-	@cog_ext.cog_slash(description="send bug report to bugs channel in support discord",name='bugreport')
-	async def bugreport(self,ctx:SlashContext,report:str):
+	@discord.command(description="send bug report to bugs channel in support discord",name='bugreport')
+	async def bugreport(self,ctx:discord.ApplicationContext,report:str):
 		guild = "Unknown" if ctx.guild is None else ctx.guild.name
 		await self.bug_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{report}")
 		await self.log_channel.send("received a bug report")
-		await ctx.send("Report received!",hidden=True)
+		await ctx.respond("Report received!",ephemeral=True)
 
-	@cog_ext.cog_slash(description="send suggestion to feature requests channel in support discord",name='suggestion')
-	async def suggestion(self,ctx:SlashContext,suggestion):
+	@discord.command(description="send suggestion to feature requests channel in support discord",name='suggestion')
+	async def suggestion(self,ctx:discord.ApplicationContext,suggestion):
 		guild = "Unknown" if ctx.guild is None else ctx.guild.name
 		await self.suggestion_channel.send(f"**{ctx.author.display_name}** from **{guild}**:\n{suggestion}")
 		await self.log_channel.send("received a suggestion")
-		await ctx.send("Suggestion received!",hidden=True)
+		await ctx.respond("Suggestion received!",ephemeral=True)
 
-	@cog_ext.cog_slash(description="show statistics, including usage and amount of servers",name='stats')
-	async def stats(self,ctx:SlashContext):
+	@discord.command(description="show statistics, including usage and amount of servers",name='stats')
+	async def stats(self,ctx:discord.ApplicationContext):
 		with open("analytics.json","r") as analyticsfile: analytics = json.load(analyticsfile)
 		embed = discord.Embed(title="Analytics")
 		embed.add_field(name="Servers",value=f"{self.bot.user.name} is in {len(self.bot.guilds)} servers.")
@@ -56,14 +55,14 @@ class Meta(commands.Cog):
 			str_usage_stats += f"{cmd}: {analytics[cmd]}\n"
 		embed.add_field(name="Usage stats",value=str_usage_stats)
 		embed.add_field(name="Uptime",value=str(datetime.now() - self.t0).split(".")[0])
-		await ctx.send(embed=embed,hidden=True)
+		await ctx.respond(embed=embed,ephemeral=True)
 
-	@cog_ext.cog_slash(description="show latency",name='ping')
-	async def ping(self,ctx:SlashContext):
-		await ctx.send(f"Pong! {int(self.bot.latency * 1000)}ms",hidden=True)
+	@discord.command(description="show latency",name='ping')
+	async def ping(self,ctx:discord.ApplicationContext):
+		await ctx.respond(f"Pong! {int(self.bot.latency * 1000)}ms",ephemeral=True)
 	
-	@cog_ext.cog_slash(name='shmeckles',description='Get the amount of shmeckles of a user')
-	async def shmeckles(self,ctx:SlashContext,member:discord.Member = None):
+	@discord.command(name='shmeckles',description='Get the amount of shmeckles of a user')
+	async def shmeckles(self,ctx:discord.ApplicationContext,member:discord.Member = None):
 		if member is None:
 			member = ctx.author
 		con = sqlite3.connect("users.db")
@@ -73,26 +72,26 @@ class Meta(commands.Cog):
 		for user in cur.execute("SELECT * FROM users"):
 			if user[0] == str(member.id):
 				money = user[1]
-		await ctx.send(f"{member.mention} has <a:goldcoin:801148801653276693>{money}.",hidden=True)
+		await ctx.respond(f"{member.mention} has <a:goldcoin:801148801653276693>{money}.",ephemeral=True)
 
-	@cog_ext.cog_slash(name='give',description='Gives someone an amount of money')
-	async def give(self,ctx:SlashContext,member:discord.Member,amount:int):
+	@discord.command(name='give',description='Gives someone an amount of money')
+	async def give(self,ctx:discord.ApplicationContext,member:discord.Member,amount:int):
 		if member == ctx.author:
-			await ctx.send("You cannot give yourself money!",hidden=True)
+			await ctx.respond("You cannot give yourself money!",ephemeral=True)
 			return
 		if abs(amount) != amount:
-			await ctx.send("You cannot give someone negative money!",hidden=True)
+			await ctx.respond("You cannot give someone negative money!",ephemeral=True)
 			return
 		con = sqlite3.connect("users.db")
 		giver_money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
 		if giver_money < amount:
-			await ctx.send("You cannot give someone money you don't have!",hidden=True)
+			await ctx.respond("You cannot give someone money you don't have!",ephemeral=True)
 			return
 		taker_money = list(con.execute("SELECT money FROM users WHERE id = ?",(member.id,)))[0][0]
 		con.execute("UPDATE users SET money = ? WHERE id = ?",(giver_money - amount,ctx.author_id))
 		con.execute("UPDATE users SET money = ? WHERE id = ?",(taker_money + amount,member.id))
 		con.commit()
-		await ctx.send(f"Transferred <a:goldcoin:801148801653276693>{amount} to {member.display_name}!",hidden=True)
+		await ctx.respond(f"Transferred <a:goldcoin:801148801653276693>{amount} to {member.display_name}!",ephemeral=True)
 
 
 if __name__ == "__main__":

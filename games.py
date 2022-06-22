@@ -1,12 +1,10 @@
-import asyncio
+# import asyncio
 from re import T
 import discord
-from discord.ext import commands
-from discord.ext.commands import cog
-# from discord_slash import SlashContext,cog_ext
+# from discord_slash import discord.ApplicationContext,cog_ext
 # from discord_slash.context import ComponentContext
 # from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
-# from discord_slash.model import ButtonStyle
+# from discord_slash.model import discord.ButtonStyle
 import sqlite3
 
 from libs import c4py, extra, minespy, tttpy
@@ -25,13 +23,20 @@ if not extra.file_exists("analytics.json"):
 		json.dump(analytics,analyticsfile)
 
 with open("analytics.json","r") as analyticsfile: analytics = json.load(analyticsfile)
-class Games(commands.Cog):
+class Games(discord.Cog):
 	def __init__(self, bot):
 		self.bot = bot
 		self._last_member = None
 	
-	@cog_ext.cog_slash(name='minesweeper',description="generate minesweeper board")
-	async def minesweeper(self,ctx:SlashContext, length: int = 6, width: int = 6, mines: int = 7,hidden:bool = False):
+	@discord.command(name='minesweeper',description="generate minesweeper board")
+	async def minesweeper(
+		self,
+		ctx:discord.ApplicationContext,
+		length: discord.Option(int, min_value=2, max_value=10,default=6),
+		width: discord.Option(int, min_value=2, max_value=10,default=6),
+		mines: int = 7,
+		hidden:bool = False
+		):
 		global analytics
 		analytics["minesweeper"] += 1
 		extra.update_analytics(analytics)
@@ -54,38 +59,35 @@ class Games(commands.Cog):
 			gridstr = gridstr.replace("B","||:boom:||")
 		gridstr = extra.replacenth(gridstr,"||:zero:||",":zero:",random.randint(0,gridstr.count("||:zero:||")))
 		embed = discord.Embed(title=f"{length}x{width} with {mines} mines",description=gridstr)
-		await ctx.send(embed=embed,hidden=hidden)
+		await ctx.respond(embed=embed,ephemeral=hidden)
 	
-	@cog_ext.cog_slash(name='rockpaperscissors',description="play rock paper scissors with someone")
-	async def rps(self,ctx:SlashContext,member:discord.Member):
+	@discord.command(name='rockpaperscissors',description="play rock paper scissors with someone")
+	async def rps(self,ctx:discord.ApplicationContext,member:discord.Member):
 		global analytics
 		analytics["rps"] += 1
 		extra.update_analytics(analytics)
-		components = create_actionrow(create_button(style=ButtonStyle.blue,label="Rock",emoji=u"\U0001f5ff"),create_button(style=ButtonStyle.green,label="Paper",emoji=u"\U0001f4f0"),create_button(style=ButtonStyle.red,label="Scissors",emoji=u"\u2702"))
-		await ctx.send(f"{ctx.author.mention} {member.mention} Rock, paper, or scissors?",components=[components])
-		button_ctx:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx:c_ctx.author == ctx.author or c_ctx.author == member)
-		await button_ctx.send(f"Chosen {button_ctx.component['label']}",hidden=True)
-		button_ctx_2:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx:(c_ctx.author == ctx.author or c_ctx.author == member) and c_ctx.author != button_ctx.author)
-		# await button_ctx_2.send(f"{button_ctx_2.author.display_name} has chosen!")
+		view = extra.RPSView(player1=ctx.author,player2=member,timeout=None)
+		await ctx.respond(f"{ctx.author.mention} {member.mention} Rock, paper, or scissors?",view=view)
+		await view.wait()
 		winner:discord.Member = None
 		description = ""
-		if button_ctx.component['label'] == "Paper" and button_ctx_2.component['label'] == "Rock": # paper > rock
-			winner = button_ctx.author
-		elif button_ctx.component['label'] == "Scissors" and button_ctx_2.component['label'] == "Paper": # scissors > paper
-			winner = button_ctx.author
-		elif button_ctx.component['label'] == "Rock" and button_ctx_2.component['label'] == "Scissors": # rock > scissors
-			winner = button_ctx.author
-		elif button_ctx.component['label'] == button_ctx_2.component['label']:
-			description = f"{button_ctx.component['emoji']['name']}   v   {button_ctx_2.component['emoji']['name']}\n\n\nIt's a tie!"
+		if view.player1_choice == extra.RPSChoices.PAPER and view.player2_choice == extra.RPSChoices.ROCK: # paper > rock
+			winner = view.player1
+		elif view.player1_choice == extra.RPSChoices.SCISSORS and view.player2_choice == extra.RPSChoices.PAPER: # scissors > paper
+			winner = view.player1
+		elif view.player1_choice == extra.RPSChoices.ROCK and view.player2_choice == extra.RPSChoices.SCISSORS: # rock > scissors
+			winner = view.player2
+		elif view.player1_choice == view.player2_choice:
+			description = f"{extra.RPStoEMOJI[view.player1_choice]}   v   {extra.RPStoEMOJI[view.player2_choice]}\n\n\nIt's a tie!"
 		else:
-			winner = button_ctx_2.author
+			winner = view.player2
 		if not description:
-			description = f"{button_ctx.component['emoji']['name']}   v   {button_ctx_2.component['emoji']['name']}\n\n\n{winner.display_name} won!"
-		game_embed = discord.Embed(title=f"{button_ctx.author.display_name} v {button_ctx_2.author.display_name}",description=description)
-		await button_ctx_2.send(embed=game_embed)
+			description = f"{extra.RPStoEMOJI[view.player1_choice]}   v   {extra.RPStoEMOJI[view.player2_choice]}\n\n\n{winner.display_name} won!"
+		game_embed = discord.Embed(title=f"{view.player1.display_name} v {view.player2.display_name}",description=description)
+		await ctx.send(embed=game_embed)
 	
-	@cog_ext.cog_slash(description="play tic tac toe with someone",name="tictactoe")
-	async def tictactoe(self,ctx:SlashContext,opponent:discord.Member,save:str = None):
+	@discord.command(description="play tic tac toe with someone",name="tictactoe")
+	async def tictactoe(self,ctx:discord.ApplicationContext,opponent:discord.Member,save:str = None):
 		global analytics
 		analytics["tictactoe"] += 1
 		extra.update_analytics(analytics)
@@ -109,22 +111,22 @@ class Games(commands.Cog):
 		msgembed.set_footer(text=savestate)
 		components = [
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="wa",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="w",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="wd",emoji="\u2B1C")
+				create_button(style=discord.ButtonStyle.gray,custom_id="wa",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id="w",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id="wd",emoji="\u2B1C")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="a",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id=".",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="d",emoji="\u2B1C")
+				create_button(style=discord.ButtonStyle.gray,custom_id="a",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id=".",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id="d",emoji="\u2B1C")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.gray,custom_id="sa",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="s",emoji="\u2B1C"),
-				create_button(style=ButtonStyle.gray,custom_id="sd",emoji="\u2B1C")
+				create_button(style=discord.ButtonStyle.gray,custom_id="sa",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id="s",emoji="\u2B1C"),
+				create_button(style=discord.ButtonStyle.gray,custom_id="sd",emoji="\u2B1C")
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.red,label="Exit",custom_id="q"),
+				create_button(style=discord.ButtonStyle.red,label="Exit",custom_id="q"),
 			)
 		]
 		await ctx.send(embeds=[msgembed],components=components)
@@ -186,8 +188,8 @@ class Games(commands.Cog):
 				await ctx.send("Nobody won, the game is tied.")
 				return
 	
-	@cog_ext.cog_slash(name='connect4',description="play connect four with someone")
-	async def connectfour(self,ctx:SlashContext,opponent:discord.Member,save:str = None):
+	@discord.command(name='connect4',description="play connect four with someone")
+	async def connectfour(self,ctx:discord.ApplicationContext,opponent:discord.Member,save:str = None):
 		tiles_list = themes[random.choice(list(themes))]
 		global analytics
 		analytics["connectfour"] += 1
@@ -219,18 +221,18 @@ class Games(commands.Cog):
 			return
 		components = [
 			create_actionrow(
-				create_button(style=ButtonStyle.blue,label="1",custom_id="1"),
-				create_button(style=ButtonStyle.blue,label="2",custom_id="2"),
-				create_button(style=ButtonStyle.blue,label="3",custom_id="3"),
+				create_button(style=discord.ButtonStyle.blue,label="1",custom_id="1"),
+				create_button(style=discord.ButtonStyle.blue,label="2",custom_id="2"),
+				create_button(style=discord.ButtonStyle.blue,label="3",custom_id="3"),
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.blue,label="4",custom_id="4"),
-				create_button(style=ButtonStyle.blue,label="5",custom_id="5"),
-				create_button(style=ButtonStyle.blue,label="6",custom_id="6"),
+				create_button(style=discord.ButtonStyle.blue,label="4",custom_id="4"),
+				create_button(style=discord.ButtonStyle.blue,label="5",custom_id="5"),
+				create_button(style=discord.ButtonStyle.blue,label="6",custom_id="6"),
 			),
 			create_actionrow(
-				create_button(style=ButtonStyle.red,label="Quit",custom_id="q"),
-				create_button(style=ButtonStyle.blue,label="7",custom_id="7"),
+				create_button(style=discord.ButtonStyle.red,label="Quit",custom_id="q"),
+				create_button(style=discord.ButtonStyle.blue,label="7",custom_id="7"),
 			)
 		]
 		msgembed = discord.Embed(title=title)
@@ -281,8 +283,8 @@ class Games(commands.Cog):
 				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 				return
 	
-	@cog_ext.cog_slash(name='blackjack',description='Gamble away all of your shmeckles, or win the jackbot!')
-	async def blackjack(self,ctx:SlashContext,bet:int):
+	@discord.command(name='blackjack',description='Gamble away all of your shmeckles, or win the jackbot!')
+	async def blackjack(self,ctx:discord.ApplicationContext,bet:int):
 		if abs(bet) != bet:
 			await ctx.send("You cannot bet a negative amount!",hidden=True)
 			return
@@ -291,7 +293,7 @@ class Games(commands.Cog):
 		if bet > money:
 			await ctx.send("You are betting money you don't have!",hidden=True)
 			return
-		components = [create_actionrow(create_button(style=ButtonStyle.blue,label="Hit",custom_id="h"),create_button(style=ButtonStyle.gray,label="Stand",custom_id="s"))]
+		components = [create_actionrow(create_button(style=discord.ButtonStyle.blue,label="Hit",custom_id="h"),create_button(style=ButtonStyle.gray,label="Stand",custom_id="s"))]
 		dealer_draws = 1
 		player_cards = random.randint(1,10) + random.randint(1,10)
 		dealer_cards = random.randint(1,10) + random.randint(1,10)

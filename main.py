@@ -38,7 +38,7 @@ with open("analytics.json","r") as analyticsfile:
 with open("themes.json", "r") as themesfile: themes = json.load(themesfile)
 print(f"prefix:/")
 
-client = discord.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default())
+client = discord.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default(),debug_guilds=[None if tokenfilename == "tokenfile" else 775406605906870302])
 # slash = SlashCommand(client,sync_commands=True,debug_guild=None if tokenfilename == "tokenfile" else 775406605906870302)
 log_channel = None
 
@@ -60,7 +60,7 @@ async def on_ready():
 	for guild in client.guilds:
 		print(f"In guild: {guild.name}")
 	print(f"In {len(client.guilds)} guilds")
-	print(f"Debug guild: {slash.debug_guild}")
+	print(f"Debug guild: {client.debug_guilds}")
 	global log_channel
 	log_channel = client.get_channel(784583344188817428)
 	await log_channel.send("waking up")
@@ -81,10 +81,10 @@ async def on_application_command(ctx:discord.ApplicationContext):
 		bonus = 2
 	if bonus is None:
 		return
-	if len(list(con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.author_id),)))) == 0:
-		con.execute("INSERT INTO users VALUES (?,?)",(str(ctx.author_id),0))
-	user = list(con.execute("SELECT * FROM users WHERE id = ?",(str(ctx.author_id),)))[0]
-	con.execute("UPDATE users SET money = ? WHERE id = ?",(user[1] + bonus,str(ctx.author_id)))
+	if len(list(con.execute("SELECT id FROM users WHERE id = ?",(str(ctx.interaction.user.id),)))) == 0:
+		con.execute("INSERT INTO users VALUES (?,?)",(str(ctx.interaction.user.id),0))
+	user = list(con.execute("SELECT * FROM users WHERE id = ?",(str(ctx.interaction.user.id),)))[0]
+	con.execute("UPDATE users SET money = ? WHERE id = ?",(user[1] + bonus,str(ctx.interaction.user.id)))
 	con.commit()
 
 client.run(token)

@@ -1,5 +1,9 @@
+import enum
+from pickle import NONE
 import re
 import json
+import discord
+
 
 async def attachments_to_files(attached):
 	filelist = []
@@ -34,51 +38,50 @@ def file_exists(filename:str):
 			return True
 	except FileNotFoundError:
 		return False
-# most code from this class was stolen from help.py in discord.py
-# class MyHelpCommand(commands.DefaultHelpCommand):
-# 	def __init__(self, **options):
-# 		self.paginator = commands.Paginator()
-# 		super().__init__(**options)
-# 		self.paginator.prefix = ""
-# 		self.paginator.suffix = ""
-# 		self.no_category = "Other"
-# 	def add_indented_commands(self, commands, *, heading, max_size=None):
-# 		if not commands:
-# 			return
-# 		self.paginator.add_line(f"**{heading}**")
-# 		max_size = max_size or self.get_max_size(commands)
-# 		get_width = discord.utils._string_width
-# 		for command in commands:
-# 			name = f"{command.name}"
-# 			width = max_size - (get_width(name) - len(name))
-# 			entry = "{0}{1:<{width}}: *{2}*".format(self.indent * " ", name, command.short_doc, width=width)
-# 			self.paginator.add_line(self.shorten_text(entry))
-# 	def get_ending_note(self):
-# 		command_name = self.invoked_with
-# 		return "Type `{0}{1} <command>` for more info on a command.\n".format(self.clean_prefix, command_name)
-# 	def add_command_formatting(self, command):
-# 		if command.description:
-# 			self.paginator.add_line(command.description, empty=True)
-# 		elif command.brief:
-# 			self.paginator.add_line(command.brief,empty=True)
-# 		signature = self.get_command_signature(command)
-# 		self.paginator.add_line(f"`{signature}`""", empty=True)
-
-# 		if command.help:
-# 			try:
-# 				self.paginator.add_line(command.help, empty=True)
-# 			except RuntimeError:
-# 				for line in command.help.splitlines():
-# 					self.paginator.add_line(line)
-# 				self.paginator.add_line()
-# 	async def send_pages(self):
-# 		destination = self.get_destination()
-# 		e = discord.Embed(title="Help",color=discord.Color.blurple(), description="")
-# 		for page in self.paginator.pages:
-# 			e.description += page
-# 		await destination.send(embed=e)
 
 def list_layouts(filename):
 		with open(filename, "r") as c4layoutsfile:
 			return json.loads(c4layoutsfile.read())
+
+class RPSChoices(enum.Enum):
+	ROCK     = "Rock"
+	PAPER    = "Paper"
+	SCISSORS = "Scissors"
+
+RPStoEMOJI = {RPSChoices.ROCK:":rock:",RPSChoices.PAPER:":newspaper:",RPSChoices.SCISSORS:":scissors:"}
+
+class RPSView(discord.ui.View):
+	def __init__(self,player1:discord.Member,player2:discord.Member,*items:discord.ui.Item,timeout:float = 180.0):
+		self.player1 = player1
+		self.player2 = player2
+		self.player1_choice = None
+		self.player2_choice = None
+		super().__init__(*items,timeout=timeout)
+	
+	async def _choose(self,choice:RPSChoices,interaction:discord.Interaction):
+		await interaction.response.send_message(f"Chosen {choice.value}",ephemeral=True)
+		print("got1")
+		self.player1_choice = choice if interaction.user == self.player1 else self.player1_choice
+		self.player2_choice = choice if interaction.user == self.player2 else self.player2_choice
+		print("got2")
+		# self.player1_choice = RPSChoices.ROCK if not self.player1_choice else self.player1_choice
+		# self.player2_choice = RPSChoices.ROCK if self.player1_choice else None
+		if self.player1_choice and self.player2_choice:
+			self.stop()
+		
+	@discord.ui.button(label="Rock",style=discord.ButtonStyle.blurple,emoji=u"\U0001f5ff")
+	async def rock(self,button:discord.ui.Button,interaction:discord.Interaction):
+		print("got0")
+		await self._choose(RPSChoices.ROCK,interaction)
+	
+	@discord.ui.button(label="Paper",style=discord.ButtonStyle.green,emoji=u"\U0001f4f0")
+	async def paper(self,button:discord.ui.Button,interaction:discord.Interaction):
+		print("got0")
+		await self._choose(RPSChoices.PAPER,interaction)
+
+	@discord.ui.button(label="Scissors",style=discord.ButtonStyle.red,emoji=u"\u2702")
+	async def scissors(self,button:discord.ui.Button,interaction:discord.Interaction):
+		print("got0")
+		await self._choose(RPSChoices.SCISSORS,interaction)
+
 # vim: noet ci pi sts=0 sw=4 ts=4:

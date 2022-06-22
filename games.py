@@ -3,10 +3,10 @@ from re import T
 import discord
 from discord.ext import commands
 from discord.ext.commands import cog
-from discord_slash import SlashContext,cog_ext
-from discord_slash.context import ComponentContext
-from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
-from discord_slash.model import ButtonStyle
+# from discord_slash import SlashContext,cog_ext
+# from discord_slash.context import ComponentContext
+# from discord_slash.utils.manage_components import create_button, create_actionrow, wait_for_component
+# from discord_slash.model import ButtonStyle
 import sqlite3
 
 from libs import c4py, extra, minespy, tttpy

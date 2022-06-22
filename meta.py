@@ -1,6 +1,6 @@
 import discord
 from discord.ext import commands
-from discord_slash import cog_ext, SlashContext
+# from discord_slash import cog_ext, SlashContext
 import json
 from datetime import datetime
 import sqlite3

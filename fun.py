@@ -1,10 +1,10 @@
 from discord.ext import commands
-from discord_slash import SlashContext, cog_ext
+# from discord_slash import SlashContext, cog_ext
 
 import sqlite3
 import random
-from discord_slash.model import SlashCommandOptionType
-from discord_slash.utils.manage_commands import create_choice, create_option
+# from discord_slash.model import SlashCommandOptionType
+# from discord_slash.utils.manage_commands import create_choice, create_option
 
 class Fun(commands.Cog):
 	def __init__(self, bot):

@@ -1,2 +1,2 @@
-discord.py
+py-cord>=2.0.0rc1
 asyncio

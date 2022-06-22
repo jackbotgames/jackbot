@@ -3,10 +3,9 @@
 from re import A
 from sys import argv as cliargs
 import json
-import discord # discord library
-from discord.ext import commands  # discord library extension to make stuff easier
-from discord_slash import SlashCommand
-from discord_slash.context import SlashContext
+import discord # pycord
+# from discord_slash import SlashCommand
+# from discord_slash.context import SlashContext
 from libs import extra
 import sqlite3
 
@@ -39,8 +38,8 @@ with open("analytics.json","r") as analyticsfile:
 with open("themes.json", "r") as themesfile: themes = json.load(themesfile)
 print(f"prefix:/")
 
-client = commands.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default())
-slash = SlashCommand(client,sync_commands=True,debug_guild=None if tokenfilename == "tokenfile" else 775406605906870302)
+client = discord.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default())
+# slash = SlashCommand(client,sync_commands=True,debug_guild=None if tokenfilename == "tokenfile" else 775406605906870302)
 log_channel = None
 
 client.add_cog(games.Games(client))
@@ -74,7 +73,7 @@ async def on_guild_join(guild:discord.Guild):
 	await log_channel.send(f"joined a guild, **{guild.name}**, with **{guild.member_count}** members\nthis brings us to a total of {1} members in {len(client.guilds)} guilds")
 
 @client.event
-async def on_slash_command(ctx:SlashContext):
+async def on_application_command(ctx:discord.ApplicationContext):
 	bonus = None
 	if ctx.cog.qualified_name == "Games":
 		bonus = 3

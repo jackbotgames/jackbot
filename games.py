@@ -109,51 +109,33 @@ class Games(discord.Cog):
 		msgembed.description = gs
 		savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
 		msgembed.set_footer(text=savestate)
-		components = [
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.gray,custom_id="wa",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id="w",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id="wd",emoji="\u2B1C")
-			),
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.gray,custom_id="a",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id=".",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id="d",emoji="\u2B1C")
-			),
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.gray,custom_id="sa",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id="s",emoji="\u2B1C"),
-				create_button(style=discord.ButtonStyle.gray,custom_id="sd",emoji="\u2B1C")
-			),
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.red,label="Exit",custom_id="q"),
-			)
-		]
-		await ctx.send(embeds=[msgembed],components=components)
+		view = extra.TTTView(ctx.author)
+		await ctx.respond(embeds=[msgembed],view=view)
 		while moves <= 9:
-			button_ctx:ComponentContext = await wait_for_component(self.bot,components=components,check=lambda c_ctx: (c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent) or c_ctx.component['custom_id'] == 'q')
+			# await wait_for_component(self.bot,components=components,check=lambda c_ctx: (c_ctx.author == ctx.author if moves % 2 == 1 else c_ctx.author == opponent) or c_ctx.component['custom_id'] == 'q')
+			await view.wait()
 			og = g
 			char = "X" if moves % 2 == 1 else "O"
-			if button_ctx.custom_id == "q":
-				await button_ctx.send("Game closed.")
+			if view.move == "q":
+				await view.interaction.response.send_message("Game closed.")
 				return
-			if button_ctx.custom_id == "wa":
+			if view.move == "wa":
 				g = g.replace("1",char)
-			elif button_ctx.custom_id == "w":
+			elif view.move == "w":
 				g = g.replace("2",char)
-			elif button_ctx.custom_id == "wd":
+			elif view.move == "wd":
 				g = g.replace("3",char)
-			elif button_ctx.custom_id == "a":
+			elif view.move == "a":
 				g = g.replace("4",char)
-			elif button_ctx.custom_id == ".":
+			elif view.move == ".":
 				g = g.replace("5",char)
-			elif button_ctx.custom_id == "d":
+			elif view.move == "d":
 				g = g.replace("6",char)
-			elif button_ctx.custom_id == "sa":
+			elif view.move == "sa":
 				g = g.replace("7",char)
-			elif button_ctx.custom_id == "s":
+			elif view.move == "s":
 				g = g.replace("8",char)
-			elif button_ctx.custom_id == "sd":
+			elif view.move == "sd":
 				g = g.replace("9",char)
 			else:
 				continue
@@ -170,7 +152,9 @@ class Games(discord.Cog):
 			msgembed.description = gs
 			savestate = base64.b64encode(f"{g}|{moves}".encode()).decode("utf-8")
 			msgembed.set_footer(text=savestate)
-			await button_ctx.edit_origin(embed=msgembed)
+			old_view = view
+			view = extra.TTTView(ctx.author if moves % 2 == 1 else opponent)
+			await old_view.interaction.response.edit_message(embed=msgembed,view=view)
 			glist = []
 			for i in g.split("\n"):
 				if i == "":
@@ -179,7 +163,7 @@ class Games(discord.Cog):
 				for j in i:
 						gltmp.append(j)
 				glist.append(gltmp)
-			glist = []
+			# glist = []
 			if tttpy.checkWin(glist):
 				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
 				await ctx.send(f"{winner} has won!")

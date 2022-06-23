@@ -60,10 +60,8 @@ class RPSView(discord.ui.View):
 	
 	async def _choose(self,choice:RPSChoices,interaction:discord.Interaction):
 		await interaction.response.send_message(f"Chosen {choice.value}",ephemeral=True)
-		print("got1")
 		self.player1_choice = choice if interaction.user == self.player1 else self.player1_choice
 		self.player2_choice = choice if interaction.user == self.player2 else self.player2_choice
-		print("got2")
 		# self.player1_choice = RPSChoices.ROCK if not self.player1_choice else self.player1_choice
 		# self.player2_choice = RPSChoices.ROCK if self.player1_choice else None
 		if self.player1_choice and self.player2_choice:
@@ -71,17 +69,57 @@ class RPSView(discord.ui.View):
 		
 	@discord.ui.button(label="Rock",style=discord.ButtonStyle.blurple,emoji=u"\U0001f5ff")
 	async def rock(self,button:discord.ui.Button,interaction:discord.Interaction):
-		print("got0")
 		await self._choose(RPSChoices.ROCK,interaction)
 	
 	@discord.ui.button(label="Paper",style=discord.ButtonStyle.green,emoji=u"\U0001f4f0")
 	async def paper(self,button:discord.ui.Button,interaction:discord.Interaction):
-		print("got0")
 		await self._choose(RPSChoices.PAPER,interaction)
 
 	@discord.ui.button(label="Scissors",style=discord.ButtonStyle.red,emoji=u"\u2702")
 	async def scissors(self,button:discord.ui.Button,interaction:discord.Interaction):
-		print("got0")
 		await self._choose(RPSChoices.SCISSORS,interaction)
+
+class TTTView(discord.ui.View):
+	def __init__(self, whose_move:discord.User,*items:discord.ui.Item):
+		self.move = ""
+		self.whose_move = whose_move
+		super().__init__(*items, timeout=None)
+	
+	async def _choose(self,move:str,interaction:discord.Interaction):
+		if self.whose_move == interaction.user or move == "q":
+			self.move = move
+			self.interaction = interaction
+			self.stop()
+	
+	@discord.ui.button(emoji="\u2B1C",row=0,style=discord.ButtonStyle.gray)
+	async def top_left(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("wa",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=0,style=discord.ButtonStyle.gray)
+	async def top_mid(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("w",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=0,style=discord.ButtonStyle.gray)
+	async def top_right(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("wd",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=1,style=discord.ButtonStyle.gray)
+	async def mid_left(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("a",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=1,style=discord.ButtonStyle.gray)
+	async def mid_mid(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(".",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=1,style=discord.ButtonStyle.gray)
+	async def mid_right(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("d",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=2,style=discord.ButtonStyle.gray)
+	async def bot_left(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("sa",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=2,style=discord.ButtonStyle.gray)
+	async def bot_mid(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("s",interaction)
+	@discord.ui.button(emoji="\u2B1C",row=2,style=discord.ButtonStyle.gray)
+	async def bot_right(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("sd",interaction)
+	@discord.ui.button(label="Exit",row=3,style=discord.ButtonStyle.red)
+	async def exit(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose("q",interaction)
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

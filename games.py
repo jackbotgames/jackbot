@@ -41,7 +41,7 @@ class Games(discord.Cog):
 		analytics["minesweeper"] += 1
 		extra.update_analytics(analytics)
 		if length * width > 196:
-			await ctx.send(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
+			await ctx.response(embed=discord.Embed(title="Error",description="Board too large. Try something smaller."))
 			return
 		if mines >= (length * width):
 			mines = (length * width) - 1
@@ -163,13 +163,13 @@ class Games(discord.Cog):
 				for j in i:
 						gltmp.append(j)
 				glist.append(gltmp)
-			# glist = []
+			glist = []
 			if tttpy.checkWin(glist):
 				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
-				await ctx.send(f"{winner} has won!")
+				await view.interaction.response.send_message(f"{winner} has won!")
 				return
 			elif moves > 9:
-				await ctx.send("Nobody won, the game is tied.")
+				await view.interaction.response.send_message("Nobody won, the game is tied.")
 				return
 	
 	@discord.command(name='connect4',description="play connect four with someone")
@@ -201,44 +201,44 @@ class Games(discord.Cog):
 		for tile in tiles_list: gridstr = gridstr.replace(tile,tiles_list[tile])
 		title = f"Connect 4: *{ctx.author.display_name}*{tiles_list['X']} vs {opponent.display_name}{tiles_list['O']}" if moves % 2 == 1 else f"Connect 4: {ctx.author.display_name}{tiles_list['X']} vs *{opponent.display_name}*{tiles_list['O']}"
 		if len(gridstr) > 2048:
-			await ctx.send("The grid is too big!")
+			await ctx.respond("The grid is too big!")
 			return
-		components = [
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.blue,label="1",custom_id="1"),
-				create_button(style=discord.ButtonStyle.blue,label="2",custom_id="2"),
-				create_button(style=discord.ButtonStyle.blue,label="3",custom_id="3"),
-			),
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.blue,label="4",custom_id="4"),
-				create_button(style=discord.ButtonStyle.blue,label="5",custom_id="5"),
-				create_button(style=discord.ButtonStyle.blue,label="6",custom_id="6"),
-			),
-			create_actionrow(
-				create_button(style=discord.ButtonStyle.red,label="Quit",custom_id="q"),
-				create_button(style=discord.ButtonStyle.blue,label="7",custom_id="7"),
-			)
-		]
+		# components = [
+		# 	create_actionrow(
+		# 		create_button(style=discord.ButtonStyle.blue,label="1",custom_id="1"),
+		# 		create_button(style=discord.ButtonStyle.blue,label="2",custom_id="2"),
+		# 		create_button(style=discord.ButtonStyle.blue,label="3",custom_id="3"),
+		# 	),
+		# 	create_actionrow(
+		# 		create_button(style=discord.ButtonStyle.blue,label="4",custom_id="4"),
+		# 		create_button(style=discord.ButtonStyle.blue,label="5",custom_id="5"),
+		# 		create_button(style=discord.ButtonStyle.blue,label="6",custom_id="6"),
+		# 	),
+		# 	create_actionrow(
+		# 		create_button(style=discord.ButtonStyle.red,label="Quit",custom_id="q"),
+		# 		create_button(style=discord.ButtonStyle.blue,label="7",custom_id="7"),
+		# 	)
+		# ]
+		view = extra.C4View(ctx.author if moves % 2 == 1 else opponent)
 		msgembed = discord.Embed(title=title)
 		msgembed.description = gridstr
 		savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
 		msgembed.set_footer(text=savestate)
-		await ctx.send(embed=msgembed,components=components)
-	
+		await ctx.respond(embed=msgembed,view=view)
 		while moves <= 42:
 			def check(message):
 				user = message.author
 				return user == opponent if moves % 2 == 0 else user == ctx.author
-			button_ctx:ComponentContext = await wait_for_component(self.bot,components=components,check=check)
-			if button_ctx.custom_id == "q":
-				await ctx.send("game ended")
+			await view.wait()
+			if view.move == "q":
+				await view.interaction.response.send_message("game ended")
 				return
 			bg = list(g)
 			for y in g:
 				# and not (y == g[0] and y[int(c) - 1] in ["X","O"])
-				if not y[int(button_ctx.custom_id) - 1] == " ": continue
+				if not y[int(view.move) - 1] == " ": continue
 				t = list(y)
-				t[int(button_ctx.custom_id) - 1] = "X" if moves % 2 == 1 else "O"
+				t[int(view.move) - 1] = "X" if moves % 2 == 1 else "O"
 				g[g.index(y)] = "".join(t)
 				break
 			moves += 1 if bg != g else 0
@@ -250,7 +250,9 @@ class Games(discord.Cog):
 			msgembed.description = gridstr
 			savestate = base64.b64encode(f"{json.dumps(g)}|{moves}".encode()).decode("utf-8")
 			msgembed.set_footer(text=savestate)
-			await button_ctx.edit_origin(embed=msgembed)
+			old_view = view
+			view = extra.C4View(ctx.author if moves % 2 == 1 else opponent)
+			await old_view.interaction.response.edit_message(embed=msgembed,view=view)
 			glist = []
 			for i in g:
 				if i == "\n":
@@ -261,54 +263,57 @@ class Games(discord.Cog):
 				glist.append(gltmp)
 			if c4py.check_win(glist,"X") or c4py.check_win(glist,"O"):
 				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
-				await ctx.send(f"{winner} has won!")
+				await view.interaction.response.send_message(f"{winner} has won!")
 				return
 			elif moves > 42:
-				await ctx.send("Nobody won, the game is tied. How did you manage to do that in connect 4?")
+				await view.interaction.response.send_message("Nobody won, the game is tied. How did you manage to do that in connect 4?")
 				return
 	
 	@discord.command(name='blackjack',description='Gamble away all of your shmeckles, or win the jackbot!')
 	async def blackjack(self,ctx:discord.ApplicationContext,bet:int):
 		if abs(bet) != bet:
-			await ctx.send("You cannot bet a negative amount!",hidden=True)
+			await ctx.respond("You cannot bet a negative amount!",ephemeral=True)
 			return
 		con = sqlite3.connect("users.db")
-		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
+		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author.id,)))[0][0]
 		if bet > money:
-			await ctx.send("You are betting money you don't have!",hidden=True)
+			await ctx.respond("You are betting money you don't have!",ephemeral=True)
 			return
-		components = [create_actionrow(create_button(style=discord.ButtonStyle.blue,label="Hit",custom_id="h"),create_button(style=ButtonStyle.gray,label="Stand",custom_id="s"))]
+		# components = [create_actionrow(create_button(style=discord.ButtonStyle.blue,label="Hit",custom_id="h"),create_button(style=ButtonStyle.gray,label="Stand",custom_id="s"))]
+		view = extra.BJView()
 		dealer_draws = 1
 		player_cards = random.randint(1,10) + random.randint(1,10)
 		dealer_cards = random.randint(1,10) + random.randint(1,10)
 		embed = discord.Embed(title=f"Blackjack for <a:goldcoin:801148801653276693>{bet}",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
-		await ctx.send(embeds=[embed],components=components,hidden=True)
+		await ctx.respond(embeds=[embed],view=view,ephemeral=True)
 		while player_cards < 21:
-			button_ctx = await wait_for_component(client=self.bot,components=components)
-			if button_ctx.custom_id == "h":
+			view.wait()
+			if view.button_pressed.custom_id == "h":
 				player_cards += random.randint(1,10)
 				dealer_cards += 0 if dealer_cards >= 17 else random.randint(1,10)
 				dealer_draws += 1
-			elif button_ctx.custom_id == "s":
+			elif view.button_pressed.custom_id == "s":
 				while dealer_cards <= 17:
 					dealer_cards += random.randint(1,10)
 					dealer_draws += 1
 			embed = discord.Embed(title=f"Blackjack for <a:goldcoin:801148801653276693>{bet}",description=f"Your cards: {player_cards}\nDealer's cards: {dealer_cards}\nDealer draws: {dealer_draws}")
-			await button_ctx.send(embeds=[embed],hidden=True,components=components)
+			old_view = view
+			view = extra.BJView()
+			await old_view.interaction.response.send_message(embeds=[embed],ephemeral=True,view=view)
 			if player_cards > 21:
-				await button_ctx.send(f"You lose! -<a:goldcoin:801148801653276693>{bet}.",hidden=True)
+				await old_view.interaction.response.send_message(f"You lose! -<a:goldcoin:801148801653276693>{bet}.",ephemeral=True)
 				win = -1
 				break
 			if dealer_cards > 21 or (dealer_cards >= 17 and player_cards > dealer_cards):
-				await button_ctx.send(f"You win! +<a:goldcoin:801148801653276693>{bet}.",hidden=True)
+				await old_view.interaction.response.send_message(f"You win! +<a:goldcoin:801148801653276693>{bet}.",hidden=True)
 				win = 1
 				break
 			if dealer_cards == 21 and (player_cards == dealer_cards):
-				await button_ctx.send("It's a draw!",hidden=True)
+				await old_view.interaction.response.send_message("It's a draw!",hidden=True)
 				return
-		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
+		money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author.id,)))[0][0]
 		await ctx.send(f"You now have a total of <a:goldcoin:801148801653276693>{money + (bet * win)}.",hidden=True)
-		con.execute("UPDATE users SET money = ? WHERE id = ?",(money + (bet * win),str(ctx.author_id)))
+		con.execute("UPDATE users SET money = ? WHERE id = ?",(money + (bet * win),str(ctx.author.id)))
 		con.commit()
 
 

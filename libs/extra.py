@@ -83,6 +83,7 @@ class TTTView(discord.ui.View):
 	def __init__(self, whose_move:discord.User,*items:discord.ui.Item):
 		self.move = ""
 		self.whose_move = whose_move
+		self.interaction = None
 		super().__init__(*items, timeout=None)
 	
 	async def _choose(self,move:str,interaction:discord.Interaction):
@@ -121,5 +122,61 @@ class TTTView(discord.ui.View):
 	@discord.ui.button(label="Exit",row=3,style=discord.ButtonStyle.red)
 	async def exit(self,button:discord.ui.Button,interaction:discord.Interaction):
 		await self._choose("q",interaction)
+
+class C4View(discord.ui.View):
+	def __init__(self, whose_turn:discord.User,*items: discord.ui.Item):
+		self.whose_turn = whose_turn
+		self.interaction = None
+		self.move = ""
+		super().__init__(*items, timeout=None)
+	
+	async def _choose(self,button:discord.ui.Button,interaction:discord.Interaction):
+		move = button.label
+		if self.whose_turn == interaction.user:
+			self.move = move
+			self.interaction = interaction
+			self.stop()
+
+	@discord.ui.button(label="1",row=0,style=discord.ButtonStyle.blurple)
+	async def select_1(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="2",row=0,style=discord.ButtonStyle.blurple)
+	async def select_2(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="3",row=0,style=discord.ButtonStyle.blurple)
+	async def select_3(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="4",row=1,style=discord.ButtonStyle.blurple)
+	async def select_4(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="5",row=1,style=discord.ButtonStyle.blurple)
+	async def select_5(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="6",row=1,style=discord.ButtonStyle.blurple)
+	async def select_6(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="q",row=2,style=discord.ButtonStyle.red)
+	async def select_q(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+	@discord.ui.button(label="7",row=2,style=discord.ButtonStyle.blurple)
+	async def select_7(self,button:discord.ui.Button,interaction:discord.Interaction):
+		await self._choose(button,interaction)
+
+class BJView(discord.ui.View):
+	def __init__(self, *items: discord.ui.Item):
+		self.button_pressed = None
+		self.interaction = None
+		super().__init__(*items, timeout=None)
+	
+	@discord.ui.button(label="Hit",custom_id="h",style=discord.ButtonStyle.blurple)
+	async def hit(self,button:discord.ui.Button,interaction:discord.Interaction):
+		self.button_pressed = button
+		self.interaction = interaction
+		self.stop()
+	@discord.ui.button(label="Stand",custom_id="s",style=discord.ButtonStyle.gray)
+	async def stand(self,button:discord.ui.Button,interaction:discord.Interaction):
+		self.button_pressed = button
+		self.interaction = interaction
+		self.stop()
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

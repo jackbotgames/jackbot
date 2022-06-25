@@ -38,7 +38,7 @@ with open("analytics.json","r") as analyticsfile:
 with open("themes.json", "r") as themesfile: themes = json.load(themesfile)
 print(f"prefix:/")
 
-client = discord.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default(),debug_guilds=[None if tokenfilename == "tokenfile" else 775406605906870302])
+client = discord.Bot(command_prefix=" ",activity=discord.Game("starting up..."),intents=discord.Intents.default(),debug_guilds=None if tokenfilename == "tokenfile" else [775406605906870302])
 # slash = SlashCommand(client,sync_commands=True,debug_guild=None if tokenfilename == "tokenfile" else 775406605906870302)
 log_channel = None
 

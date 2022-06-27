@@ -163,7 +163,6 @@ class Games(discord.Cog):
 				for j in i:
 						gltmp.append(j)
 				glist.append(gltmp)
-			glist = []
 			if tttpy.checkWin(glist):
 				winner = ctx.author.display_name if moves % 2 == 0 else opponent.display_name
 				await view.interaction.response.send_message(f"{winner} has won!")

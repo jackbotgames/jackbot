@@ -83,12 +83,12 @@ class Meta(discord.Cog):
 			await ctx.respond("You cannot give someone negative money!",ephemeral=True)
 			return
 		con = sqlite3.connect("users.db")
-		giver_money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author_id,)))[0][0]
+		giver_money = list(con.execute("SELECT money FROM users WHERE id = ?",(ctx.author.id,)))[0][0]
 		if giver_money < amount:
 			await ctx.respond("You cannot give someone money you don't have!",ephemeral=True)
 			return
 		taker_money = list(con.execute("SELECT money FROM users WHERE id = ?",(member.id,)))[0][0]
-		con.execute("UPDATE users SET money = ? WHERE id = ?",(giver_money - amount,ctx.author_id))
+		con.execute("UPDATE users SET money = ? WHERE id = ?",(giver_money - amount,ctx.author.id))
 		con.execute("UPDATE users SET money = ? WHERE id = ?",(taker_money + amount,member.id))
 		con.commit()
 		await ctx.respond(f"Transferred <a:goldcoin:801148801653276693>{amount} to {member.display_name}!",ephemeral=True)

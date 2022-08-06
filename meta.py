@@ -105,9 +105,10 @@ class Meta(discord.Cog):
 			msg += f"<@{user[0]}> - <a:goldcoin:801148801653276693>{user[1]}\n"
 		try: 
 			# print([i[0] for i in users].index(ctx.author.id))
-			msg += f"You are in {ordinal([i[0] for i in users].index(ctx.author.id) + 1)} place."
+			msg += f"You are in {ordinal([i[0] for i in users].index(ctx.author.id) + 1)} place.\n"
 		except ValueError:
-			msg += "You have no shmeckles."
+			msg += "You have no shmeckles.\n"
+		msg += f"There is <a:goldcoin:801148801653276693>{sum([i[1] for i in users])} total."
 		embed = discord.Embed(title="Shmeckle Leaderboard",description=msg)
 		await ctx.respond(embeds=[embed],ephemeral=True)
 

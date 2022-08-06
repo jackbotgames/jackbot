@@ -1,9 +1,9 @@
-from collections import OrderedDict
 import discord
 # from discord_slash import cog_ext, discord.ApplicationContext
 import json
 from datetime import datetime
 import sqlite3
+from libs.extra import ordinal
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 guild_ids=[775406605906870302]
@@ -103,6 +103,11 @@ class Meta(discord.Cog):
 		msg = ""
 		for user in users[:10]:
 			msg += f"<@{user[0]}> - <a:goldcoin:801148801653276693>{user[1]}\n"
+		try: 
+			# print([i[0] for i in users].index(ctx.author.id))
+			msg += f"You are in {ordinal([i[0] for i in users].index(ctx.author.id) + 1)} place."
+		except ValueError:
+			msg += "You have no shmeckles."
 		embed = discord.Embed(title="Shmeckle Leaderboard",description=msg)
 		await ctx.respond(embeds=[embed],ephemeral=True)
 

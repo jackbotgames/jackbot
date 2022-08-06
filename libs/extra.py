@@ -44,8 +44,8 @@ def list_layouts(filename):
 			return json.loads(c4layoutsfile.read())
 
 class RPSChoices(enum.Enum):
-	ROCK     = "Rock"
-	PAPER    = "Paper"
+	ROCK		 = "Rock"
+	PAPER		= "Paper"
 	SCISSORS = "Scissors"
 
 RPStoEMOJI = {RPSChoices.ROCK:":rock:",RPSChoices.PAPER:":newspaper:",RPSChoices.SCISSORS:":scissors:"}
@@ -178,5 +178,22 @@ class BJView(discord.ui.View):
 		self.button_pressed = button
 		self.interaction = interaction
 		self.stop()
+
+def ordinal(n:int,/): # https://codereview.stackexchange.com/q/41298
+	"""
+	Returns ordinal number string from int, e.g. 1, 2, 3 becomes 1st, 2nd, 3rd, etc.
+	"""
+	if 4 <= n <= 20:
+		suffix = 'th'
+	elif n == 1 or (n % 10) == 1:
+		suffix = 'st'
+	elif n == 2 or (n % 10) == 2:
+		suffix = 'nd'
+	elif n == 3 or (n % 10) == 3:
+		suffix = 'rd'
+	elif n < 100:
+		suffix = 'th'
+	ord_num = str(n) + suffix
+	return ord_num
 
 # vim: noet ci pi sts=0 sw=4 ts=4:

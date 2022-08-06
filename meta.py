@@ -1,9 +1,9 @@
+from collections import OrderedDict
 import discord
 # from discord_slash import cog_ext, discord.ApplicationContext
 import json
 from datetime import datetime
 import sqlite3
-
 
 repomsg = discord.Embed(title="Repo",description="https://github.com/jackbotgames/jackbot")
 guild_ids=[775406605906870302]
@@ -92,6 +92,19 @@ class Meta(discord.Cog):
 		con.execute("UPDATE users SET money = ? WHERE id = ?",(taker_money + amount,member.id))
 		con.commit()
 		await ctx.respond(f"Transferred <a:goldcoin:801148801653276693>{amount} to {member.display_name}!",ephemeral=True)
+	@discord.command(name='leaderboard',description='checks the shmeckle leaderboard')
+	async def leaderboard(self,ctx:discord.ApplicationContext):
+		con = sqlite3.connect("users.db")
+		users = dict()
+		for entry in con.execute("SELECT * FROM users"):
+			users[int(entry[0])] = int(entry[1])
+		users = list(users.items())
+		users.sort(key=lambda x: x[1],reverse=True)
+		msg = ""
+		for user in users[:10]:
+			msg += f"<@{user[0]}> - <a:goldcoin:801148801653276693>{user[1]}\n"
+		embed = discord.Embed(title="Shmeckle Leaderboard",description=msg)
+		await ctx.respond(embeds=[embed],ephemeral=True)
 
 
 if __name__ == "__main__":
